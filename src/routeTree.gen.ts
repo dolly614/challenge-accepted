@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DailyDayRouteImport } from './routes/daily.$day'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -28,35 +29,44 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DailyDayRoute = DailyDayRouteImport.update({
+  id: '/daily/$day',
+  path: '/daily/$day',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/register': typeof RegisterRoute
+  '/daily/$day': typeof DailyDayRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/register': typeof RegisterRoute
+  '/daily/$day': typeof DailyDayRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/register': typeof RegisterRoute
+  '/daily/$day': typeof DailyDayRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/register'
+  fullPaths: '/' | '/dashboard' | '/register' | '/daily/$day'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/register'
-  id: '__root__' | '/' | '/dashboard' | '/register'
+  to: '/' | '/dashboard' | '/register' | '/daily/$day'
+  id: '__root__' | '/' | '/dashboard' | '/register' | '/daily/$day'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
   RegisterRoute: typeof RegisterRoute
+  DailyDayRoute: typeof DailyDayRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +92,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/daily/$day': {
+      id: '/daily/$day'
+      path: '/daily/$day'
+      fullPath: '/daily/$day'
+      preLoaderRoute: typeof DailyDayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
   RegisterRoute: RegisterRoute,
+  DailyDayRoute: DailyDayRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

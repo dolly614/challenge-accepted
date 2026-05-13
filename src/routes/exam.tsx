@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { useEffect, useState } from "react";
-import { Clock, Trophy } from "lucide-react";
+import { Clock, Trophy, Award } from "lucide-react";
+import { generateCertificate } from "@/lib/certificate";
 
 export const Route = createFileRoute("/exam")({
   head: () => ({ meta: [{ title: "Final Exam — 30 Days Challenge" }] }),
@@ -34,6 +35,13 @@ function Exam() {
   const ss = String(time % 60).padStart(2, "0");
 
   if (done) {
+    if (typeof window !== "undefined") {
+      try { localStorage.setItem("examScore", String(score)); } catch {}
+    }
+    let student = { name: "Student", cls: "5" };
+    if (typeof window !== "undefined") {
+      try { const s = localStorage.getItem("student"); if (s) { const p = JSON.parse(s); student = { name: p.name || "Student", cls: String(p.cls || "5") }; } } catch {}
+    }
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -43,6 +51,12 @@ function Exam() {
           <p className="mt-2 text-muted-foreground">Aapka score</p>
           <div className="mt-4 text-6xl font-extrabold text-gradient">{score}/30</div>
           <p className="mt-3 text-sm text-muted-foreground">Final ranks calculate hone ke baad leaderboard pe dekho.</p>
+          <button
+            onClick={() => generateCertificate({ name: student.name, cls: student.cls, score })}
+            className="mt-6 inline-flex h-12 items-center gap-2 rounded-full bg-gradient-hero px-6 text-sm font-semibold text-primary-foreground shadow-soft hover:scale-[1.02]"
+          >
+            <Award className="h-4 w-4"/> Download Your Certificate
+          </button>
         </section>
         <Footer />
       </div>

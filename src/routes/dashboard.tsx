@@ -4,6 +4,7 @@ import { Footer } from "@/components/site/Footer";
 import { useEffect, useState } from "react";
 import { getTopicsForClass, leaderboardSample, TOTAL_DAYS } from "@/lib/data/challenge";
 import { Flame, Lock, Trophy, Award, Share2, CheckCircle2 } from "lucide-react";
+import { generateCertificate } from "@/lib/certificate";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — 30 Days Challenge" }] }),
@@ -28,6 +29,17 @@ function Dashboard() {
   const topics = getTopicsForClass(parseInt(student.cls) || 5);
   const pct = Math.round((completed.length / TOTAL_DAYS) * 100);
   const examUnlocked = completed.length >= TOTAL_DAYS;
+  const examScoreRaw = typeof window !== "undefined" ? localStorage.getItem("examScore") : null;
+  const examScore = examScoreRaw ? parseInt(examScoreRaw) : null;
+  const certificateReady = examScore !== null;
+
+  const handleDownloadCertificate = () => {
+    if (!certificateReady) {
+      alert("Final exam complete karne ke baad certificate unlock hoga.");
+      return;
+    }
+    generateCertificate({ name: student.name, cls: student.cls, score: examScore ?? undefined });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -120,8 +132,13 @@ function Dashboard() {
               )}
             </div>
 
-            <button className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-card p-4 text-sm font-semibold shadow-card hover:bg-accent">
-              <Award className="h-4 w-4 text-primary"/> Download Certificate
+            <button
+              onClick={handleDownloadCertificate}
+              disabled={!certificateReady}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-card p-4 text-sm font-semibold shadow-card hover:bg-accent disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <Award className="h-4 w-4 text-primary"/>
+              {certificateReady ? "Download Certificate" : "Certificate (after exam)"}
             </button>
             <a
               href={`https://wa.me/?text=${encodeURIComponent(`I completed Day ${completed.length} of 30 Days Challenge! 🎉 Join me: ${typeof window !== "undefined" ? window.location.origin : ""}`)}`}

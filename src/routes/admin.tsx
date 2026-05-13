@@ -4,6 +4,7 @@ import { Footer } from "@/components/site/Footer";
 import { useState } from "react";
 import { leaderboardSample } from "@/lib/data/challenge";
 import { Download, Lock, Users, IndianRupee, GraduationCap, Gift } from "lucide-react";
+import { ChaptersManager } from "@/components/admin/ChaptersManager";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — 30 Days Challenge" }] }),
@@ -95,6 +96,8 @@ function Admin() {
             </table>
           </div>
         </div>
+
+        <ChaptersManager />
       </section>
       <Footer />
     </div>

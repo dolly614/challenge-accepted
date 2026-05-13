@@ -3,6 +3,7 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { useEffect, useState } from "react";
 import { getTopicsForClass } from "@/lib/data/challenge";
+import { getChapter } from "@/lib/chapters";
 import { CheckCircle2, ArrowRight, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/daily/$day")({
@@ -23,17 +24,23 @@ function Daily() {
   const dayNum = parseInt(day) || 1;
   const nav = useNavigate();
   const [cls, setCls] = useState(5);
+  const [customContent, setCustomContent] = useState<string | null>(null);
+  const [customTitle, setCustomTitle] = useState<string | null>(null);
   const [answers, setAnswers] = useState<number[]>(Array(5).fill(-1));
   const [submitted, setSubmitted] = useState(false);
   const [confetti, setConfetti] = useState(false);
 
   useEffect(() => {
     const s = localStorage.getItem("student");
-    if (s) try { setCls(parseInt(JSON.parse(s).cls) || 5); } catch {}
-  }, []);
+    let c = 5;
+    if (s) try { c = parseInt(JSON.parse(s).cls) || 5; } catch {}
+    setCls(c);
+    const ch = getChapter(c, dayNum);
+    if (ch) { setCustomContent(ch.content); setCustomTitle(ch.title || null); }
+  }, [dayNum]);
 
   const topics = getTopicsForClass(cls);
-  const topic = topics[dayNum - 1] || "Revision";
+  const topic = customTitle || topics[dayNum - 1] || "Revision";
   const score = answers.reduce((acc, a, i) => acc + (a === sampleQuestions[i].a ? 1 : 0), 0);
 
   function submit() {
@@ -56,13 +63,16 @@ function Daily() {
 
         <article className="mt-6 rounded-3xl border border-border bg-card p-6 shadow-card">
           <div className="flex items-center gap-2 text-sm font-semibold text-primary"><Sparkles className="h-4 w-4"/> Reading</div>
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            Today's topic <b className="text-foreground">{topic}</b> humari learning journey ka important part hai.
-            Is topic ko samajhne ke liye examples dekho, definitions ko notebook mein likho aur apne friends ke saath
-            discuss karo. Yaad rakho — consistency hi kaamyabi ki chaabi hai. Roz thoda padho, har din ek naya concept
-            seekho, aur 30 din ke baad aap khud notice karoge ki aap kitne aage badh chuke ho. Practice questions ko
-            seriously lo, kyunki yahi questions exam ki preparation banayenge. All the best, champion! 🚀
-          </p>
+          {customContent ? (
+            <div className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-foreground">{customContent}</div>
+          ) : (
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              Today's topic <b className="text-foreground">{topic}</b> humari learning journey ka important part hai.
+              Is topic ko samajhne ke liye examples dekho, definitions ko notebook mein likho aur apne friends ke saath
+              discuss karo. Yaad rakho — consistency hi kaamyabi ki chaabi hai. Roz thoda padho, har din ek naya concept
+              seekho, aur 30 din ke baad aap khud notice karoge ki aap kitne aage badh chuke ho. All the best, champion! 🚀
+            </p>
+          )}
         </article>
 
         <div className="mt-8 space-y-4">

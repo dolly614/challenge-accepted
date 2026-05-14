@@ -6,6 +6,7 @@ import { leaderboardSample } from "@/lib/data/challenge";
 import { Download, Lock, Users, IndianRupee, GraduationCap, Gift } from "lucide-react";
 import { ChaptersManager } from "@/components/admin/ChaptersManager";
 import { BulkImport } from "@/components/admin/BulkImport";
+import { TeachersPanel } from "@/components/admin/TeachersPanel";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — 30 Days Challenge" }] }),
@@ -100,6 +101,7 @@ function Admin() {
 
         <BulkImport />
         <ChaptersManager />
+        <TeachersPanel />
       </section>
       <Footer />
     </div>

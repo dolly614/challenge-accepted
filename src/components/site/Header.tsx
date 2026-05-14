@@ -15,6 +15,7 @@ export function Header() {
           <Link to="/" className="text-muted-foreground hover:text-foreground">Home</Link>
           <Link to="/leaderboard" className="text-muted-foreground hover:text-foreground">Leaderboard</Link>
           <Link to="/dashboard" className="text-muted-foreground hover:text-foreground">Dashboard</Link>
+          <Link to="/teacher" className="text-muted-foreground hover:text-foreground">Teacher</Link>
           <Link to="/admin" className="text-muted-foreground hover:text-foreground">Admin</Link>
         </nav>
         <Link

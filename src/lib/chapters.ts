@@ -34,6 +34,20 @@ export function deleteChapter(cls: number, day: number) {
   write(s);
 }
 
+export function deleteClassChapters(cls: number): number {
+  const s = read();
+  let n = 0;
+  for (const k of Object.keys(s)) {
+    if (k.startsWith(`${cls}_`)) { delete s[k]; n++; }
+  }
+  write(s);
+  return n;
+}
+
+export function resetAllChapters() {
+  if (typeof window !== "undefined") localStorage.removeItem(KEY);
+}
+
 export async function extractPdfText(file: File): Promise<string> {
   const pdfjs: any = await import("pdfjs-dist");
   // Configure worker (Vite-friendly)

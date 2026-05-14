@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TeacherRouteImport } from './routes/teacher'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as ExamRouteImport } from './routes/exam'
@@ -17,6 +18,11 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DailyDayRouteImport } from './routes/daily.$day'
 
+const TeacherRoute = TeacherRouteImport.update({
+  id: '/teacher',
+  path: '/teacher',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -60,6 +66,7 @@ export interface FileRoutesByFullPath {
   '/exam': typeof ExamRoute
   '/leaderboard': typeof LeaderboardRoute
   '/register': typeof RegisterRoute
+  '/teacher': typeof TeacherRoute
   '/daily/$day': typeof DailyDayRoute
 }
 export interface FileRoutesByTo {
@@ -69,6 +76,7 @@ export interface FileRoutesByTo {
   '/exam': typeof ExamRoute
   '/leaderboard': typeof LeaderboardRoute
   '/register': typeof RegisterRoute
+  '/teacher': typeof TeacherRoute
   '/daily/$day': typeof DailyDayRoute
 }
 export interface FileRoutesById {
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   '/exam': typeof ExamRoute
   '/leaderboard': typeof LeaderboardRoute
   '/register': typeof RegisterRoute
+  '/teacher': typeof TeacherRoute
   '/daily/$day': typeof DailyDayRoute
 }
 export interface FileRouteTypes {
@@ -90,6 +99,7 @@ export interface FileRouteTypes {
     | '/exam'
     | '/leaderboard'
     | '/register'
+    | '/teacher'
     | '/daily/$day'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -99,6 +109,7 @@ export interface FileRouteTypes {
     | '/exam'
     | '/leaderboard'
     | '/register'
+    | '/teacher'
     | '/daily/$day'
   id:
     | '__root__'
@@ -108,6 +119,7 @@ export interface FileRouteTypes {
     | '/exam'
     | '/leaderboard'
     | '/register'
+    | '/teacher'
     | '/daily/$day'
   fileRoutesById: FileRoutesById
 }
@@ -118,11 +130,19 @@ export interface RootRouteChildren {
   ExamRoute: typeof ExamRoute
   LeaderboardRoute: typeof LeaderboardRoute
   RegisterRoute: typeof RegisterRoute
+  TeacherRoute: typeof TeacherRoute
   DailyDayRoute: typeof DailyDayRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/teacher': {
+      id: '/teacher'
+      path: '/teacher'
+      fullPath: '/teacher'
+      preLoaderRoute: typeof TeacherRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/register': {
       id: '/register'
       path: '/register'
@@ -182,6 +202,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExamRoute: ExamRoute,
   LeaderboardRoute: LeaderboardRoute,
   RegisterRoute: RegisterRoute,
+  TeacherRoute: TeacherRoute,
   DailyDayRoute: DailyDayRoute,
 }
 export const routeTree = rootRouteImport

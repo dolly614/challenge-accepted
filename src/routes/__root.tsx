@@ -76,10 +76,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "India's biggest 30-day daily learning competition for Class 1–12. Register at ₹99, win up to ₹2,000." },
       { name: "author", content: "30 Days Challenge" },
       { property: "og:title", content: "30 Days Learning Challenge" },
-      { property: "og:description", content: "Seekho, Compete Karo, Jeeto!" },
+      { property: "og:description", content: "India's biggest 30-day daily learning competition for Class 1–12. Register at ₹99, win up to ₹2,000." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "30 Days Learning Challenge" },
+      { name: "twitter:description", content: "India's biggest 30-day daily learning competition for Class 1–12. Register at ₹99, win up to ₹2,000." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/Ix4t2p7PY1VOu09S6HerGmJPZQA3/social-images/social-1778781139761-ChatGPT_Image_May_14,_2026,_08_39_24_AM.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/Ix4t2p7PY1VOu09S6HerGmJPZQA3/social-images/social-1778781139761-ChatGPT_Image_May_14,_2026,_08_39_24_AM.webp" },
     ],
     links: [
       {

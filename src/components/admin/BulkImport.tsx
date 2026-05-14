@@ -1,10 +1,14 @@
-import { useRef, useState } from "react";
-import { UploadCloud, Loader2, CheckCircle2, AlertCircle, FileArchive } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { UploadCloud, Loader2, CheckCircle2, AlertCircle, FileArchive, Trash2, RotateCcw, RefreshCw } from "lucide-react";
 import {
   extractPdfTextFromBuffer,
   parseDayFromFilename,
   titleFromFilename,
   saveChapter,
+  getChapter,
+  deleteChapter,
+  deleteClassChapters,
+  resetAllChapters,
 } from "@/lib/chapters";
 import { TOTAL_DAYS } from "@/lib/data/challenge";
 
@@ -16,8 +20,10 @@ export function BulkImport({ onDone }: { onDone?: () => void }) {
   const [rows, setRows] = useState<Row[]>([]);
   const [busy, setBusy] = useState(false);
   const [overwrite, setOverwrite] = useState(true);
+  const [selectedDays, setSelectedDays] = useState<Set<number>>(new Set());
   const pdfRef = useRef<HTMLInputElement>(null);
   const zipRef = useRef<HTMLInputElement>(null);
+  const reimportRef = useRef<HTMLInputElement>(null);
 
   function update(name: string, patch: Partial<Row>) {
     setRows(prev => prev.map(r => (r.name === name ? { ...r, ...patch } : r)));
@@ -31,6 +37,7 @@ export function BulkImport({ onDone }: { onDone?: () => void }) {
       let message: string | undefined;
       if (!day) { status = "skip"; message = "Day number filename mein nahi mila"; }
       else if (seenDays.has(day)) { status = "skip"; message = `Day ${day} duplicate`; }
+      else if (!overwrite && getChapter(cls, day)) { status = "skip"; message = `Day ${day} pehle se hai (overwrite off)`; }
       else seenDays.add(day);
       return { name: e.name, day, status, message };
     });
@@ -95,10 +102,63 @@ export function BulkImport({ onDone }: { onDone?: () => void }) {
     }
   }
 
-  // overwrite=false: skip days already present
-  void overwrite; // currently always overwrites; toggle reserved for future
-
   const okCount = rows.filter(r => r.status === "ok").length;
+  const failedDays = useMemo(
+    () => Array.from(new Set(rows.filter(r => r.status === "error" && r.day).map(r => r.day as number))),
+    [rows],
+  );
+
+  function toggleDay(d: number) {
+    setSelectedDays(prev => {
+      const n = new Set(prev);
+      if (n.has(d)) n.delete(d); else n.add(d);
+      return n;
+    });
+  }
+
+  async function handleReimport(files: FileList | null) {
+    if (!files || !files.length) return;
+    const allow = new Set<number>([...failedDays, ...selectedDays]);
+    if (!allow.size) {
+      alert("Pehle failed rows ya days select karo (re-import ke liye).");
+      return;
+    }
+    setBusy(true);
+    try {
+      const all = await Promise.all(
+        Array.from(files).map(async f => ({ name: f.name, buffer: await f.arrayBuffer() })),
+      );
+      const filtered = all.filter(e => {
+        const d = parseDayFromFilename(e.name);
+        return d && allow.has(d);
+      });
+      if (!filtered.length) {
+        alert("In files mein selected/failed days ke liye koi PDF nahi mili.");
+        return;
+      }
+      await processEntries(filtered);
+      setSelectedDays(new Set());
+    } finally {
+      setBusy(false);
+      if (reimportRef.current) reimportRef.current.value = "";
+    }
+  }
+
+  function handleDeleteClass() {
+    if (!confirm(`Class ${cls} ke saare chapters delete karein? Yeh undo nahi hoga.`)) return;
+    const n = deleteClassChapters(cls);
+    setRows([]); setSelectedDays(new Set());
+    alert(`✓ Class ${cls} se ${n} chapters delete ho gaye.`);
+    onDone?.();
+  }
+
+  function handleResetAll() {
+    if (!confirm("SAARE classes ke chapters delete karein? Yeh undo nahi hoga.")) return;
+    resetAllChapters();
+    setRows([]); setSelectedDays(new Set());
+    alert("✓ Sab chapters reset ho gaye.");
+    onDone?.();
+  }
 
   return (
     <div className="mt-8 rounded-3xl border-2 border-dashed border-primary/30 bg-card p-6 shadow-card">
@@ -135,6 +195,83 @@ export function BulkImport({ onDone }: { onDone?: () => void }) {
           <input ref={zipRef} type="file" accept=".zip,application/zip" className="hidden"
             onChange={e => handleZip(e.target.files?.[0] || null)}/>
         </label>
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <label className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground">
+          <input type="checkbox" checked={overwrite} onChange={e => setOverwrite(e.target.checked)} />
+          Overwrite existing days
+        </label>
+        <button type="button" onClick={handleDeleteClass}
+          className="inline-flex h-9 items-center gap-2 rounded-full border border-destructive px-4 text-xs font-semibold text-destructive hover:bg-destructive/10">
+          <Trash2 className="h-3.5 w-3.5"/> Delete Class {cls} Chapters
+        </button>
+        <button type="button" onClick={handleResetAll}
+          className="inline-flex h-9 items-center gap-2 rounded-full border border-destructive px-4 text-xs font-semibold text-destructive hover:bg-destructive/10">
+          <RotateCcw className="h-3.5 w-3.5"/> Reset All Classes
+        </button>
+      </div>
+
+      <div className="mt-5 rounded-2xl border border-border bg-muted/20 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="text-sm font-semibold">Selective Re-import — Class {cls}</div>
+          <div className="text-xs text-muted-foreground">
+            {failedDays.length > 0 && <>Failed: {failedDays.join(", ")} • </>}
+            Selected: {selectedDays.size}
+          </div>
+        </div>
+        <div className="mt-3 grid grid-cols-6 gap-1.5 sm:grid-cols-10">
+          {Array.from({ length: TOTAL_DAYS }, (_, i) => i + 1).map(d => {
+            const present = !!getChapter(cls, d);
+            const failed = failedDays.includes(d);
+            const sel = selectedDays.has(d);
+            return (
+              <button key={d} type="button" onClick={() => toggleDay(d)}
+                className={`h-9 rounded-lg border text-xs font-semibold transition ${
+                  sel ? "border-primary bg-primary text-primary-foreground"
+                    : failed ? "border-destructive text-destructive"
+                    : present ? "border-secondary/50 bg-secondary/10 text-secondary"
+                    : "border-border text-muted-foreground"
+                }`}
+                title={`Day ${d}${present ? " • present" : ""}${failed ? " • failed" : ""}`}>
+                {d}
+              </button>
+            );
+          })}
+        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <label className={`inline-flex h-10 cursor-pointer items-center gap-2 rounded-full bg-primary px-4 text-xs font-semibold text-primary-foreground shadow-soft ${busy ? "pointer-events-none opacity-60" : "hover:opacity-90"}`}>
+            <RefreshCw className="h-3.5 w-3.5"/> Re-import Selected/Failed
+            <input ref={reimportRef} type="file" accept="application/pdf" multiple className="hidden"
+              onChange={e => handleReimport(e.target.files)} />
+          </label>
+          {selectedDays.size > 0 && (
+            <>
+              <button type="button" onClick={() => {
+                if (!confirm(`${selectedDays.size} selected days delete karein?`)) return;
+                selectedDays.forEach(d => deleteChapter(cls, d));
+                setSelectedDays(new Set());
+                onDone?.();
+              }}
+                className="inline-flex h-9 items-center gap-2 rounded-full border border-destructive px-4 text-xs font-semibold text-destructive hover:bg-destructive/10">
+                <Trash2 className="h-3.5 w-3.5"/> Delete Selected
+              </button>
+              <button type="button" onClick={() => setSelectedDays(new Set())}
+                className="text-xs font-medium text-muted-foreground underline">
+                Clear selection
+              </button>
+            </>
+          )}
+          {failedDays.length > 0 && (
+            <button type="button" onClick={() => setSelectedDays(new Set(failedDays))}
+              className="text-xs font-medium text-destructive underline">
+              Select failed ({failedDays.length})
+            </button>
+          )}
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">
+          Tip: Day boxes click karke select karo, fir sirf un days ke PDFs upload karo. Filename se day match hoga (e.g. <code className="rounded bg-muted px-1">day-07.pdf</code>).
+        </p>
       </div>
 
       {rows.length > 0 && (

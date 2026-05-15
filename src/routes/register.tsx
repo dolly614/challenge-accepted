@@ -94,7 +94,7 @@ function Register() {
                 <li>✅ 15-day Mid exam ya 30-day Final exam — choose karo</li>
                 <li>✅ Exam fee sirf challenge complete karne ke baad</li>
                 <li>✅ Digital certificate</li>
-                <li>✅ Cash prize chance ₹2,000 tak</li>
+                <li>✅ Top 3 winners win Laptop, Tablet & Phone</li>
                 <li>✅ Special participation gift</li>
               </ul>
             </div>

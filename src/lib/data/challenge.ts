@@ -53,7 +53,7 @@ export const leaderboardSample = [
 ];
 
 export const testimonials = [
-  { name: "Riya Agarwal", cls: "Class 7, Jaipur", text: "Bahut maza aaya! Roz kuch naya seekha aur ₹1000 bhi jeeta. 💜", emoji: "🌟" },
+  { name: "Riya Agarwal", cls: "Class 7, Jaipur", text: "Bahut maza aaya! Roz kuch naya seekha aur naya tablet bhi jeeta. 💜", emoji: "🌟" },
   { name: "Mohammed Faizan", cls: "Class 10, Hyderabad", text: "30 din ka challenge ne meri study habit hi badal di. Highly recommended!", emoji: "🚀" },
   { name: "Sneha Kulkarni", cls: "Class 5, Pune", text: "Mujhe certificate aur gift dono mile. Mummy bhi bahut khush hain!", emoji: "🎉" },
 ];
@@ -61,7 +61,7 @@ export const testimonials = [
 export const faqs = [
   { q: "Yeh challenge kya hai?", a: "30 din ka daily learning program jisme aap roz ek topic seekhte ho, exam dete ho aur prizes jeet sakte ho." },
   { q: "Registration fee kitni hai?", a: "Sirf ₹99 — ek baar ka payment. Ismein 30 din ka content, final exam aur certificate sab include hai." },
-  { q: "Prizes kab milenge?", a: "Final exam ke 7 working days ke andar top 3 winners ko cash transfer kar diya jayega. Baaki sabko gift + certificate milega." },
+  { q: "Prizes kab milenge?", a: "Final exam ke 15 working days ke andar top 3 winners ko Laptop / Tablet / Smartphone deliver kiya jayega. Baaki sabko gift + certificate milega." },
   { q: "Kaun participate kar sakta hai?", a: "Class 1 se Class 12 tak ka koi bhi Indian student. Parent ke saath register karna hota hai." },
   { q: "Agar koi din miss ho gaya toh?", a: "Koi baat nahi! 'Catch up' option se aap missed day complete kar sakte ho. Streak break nahi hoga." },
 ];

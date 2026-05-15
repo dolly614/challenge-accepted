@@ -10,7 +10,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "30 Days Learning Challenge — Seekho, Compete Karo, Jeeto!" },
-      { name: "description", content: "India's biggest 30-day daily learning competition for Class 1–12. FREE registration. Win up to ₹2000 + certificate." },
+      { name: "description", content: "India's biggest 30-day daily learning competition for Class 1–12. FREE registration. Win Laptop, Tablet & Smartphone + certificate." },
       { property: "og:title", content: "30 Days Learning Challenge" },
       { property: "og:description", content: "Seekho, Compete Karo, Jeeto! Daily learning challenge for Indian students." },
     ],
@@ -51,7 +51,7 @@ function Hero() {
             Seekho. <span className="text-gradient">Compete Karo.</span> <span className="text-secondary">Jeeto!</span>
           </h1>
           <p className="mt-5 max-w-lg text-base text-muted-foreground sm:text-lg">
-            India ka sabse exciting 30-day learning challenge. Roz ek topic, ek exam aur jeeto cash prizes up to ₹2,000 — - registration FREE, exam fee sirf challenge complete karne ke baad.
+            India ka sabse exciting 30-day learning challenge. Roz ek topic, ek exam aur jeeto Laptop, Tablet ya Smartphone — registration FREE, exam fee sirf challenge complete karne ke baad.
           </p>
           <div className="mt-7 flex flex-wrap items-center gap-3">
             <Link to="/register" className="inline-flex h-12 items-center rounded-full bg-gradient-hero px-7 text-sm font-semibold text-primary-foreground shadow-soft transition hover:scale-[1.03]">
@@ -94,7 +94,7 @@ function Hero() {
             </div>
           </div>
           <div className="absolute -right-4 top-6 hidden rounded-2xl bg-gradient-gold p-3 text-xs font-bold text-foreground shadow-soft md:block animate-float">
-            🥇 Win ₹2,000
+            🥇 Win a Laptop
           </div>
         </div>
       </div>
@@ -120,7 +120,7 @@ function SocialProof() {
         <div className="hidden h-6 w-px bg-border sm:block" />
         <div className="flex items-center gap-2"><GraduationCap className="h-4 w-4 text-primary"/><span>Across <b className="text-foreground">320+</b> cities in India</span></div>
         <div className="hidden h-6 w-px bg-border sm:block" />
-        <div className="flex items-center gap-2"><Trophy className="h-4 w-4 text-primary"/><span><b className="text-foreground">₹3,500</b> total prize pool per batch</span></div>
+        <div className="flex items-center gap-2"><Trophy className="h-4 w-4 text-primary"/><span>Top 3 win <b className="text-foreground">Laptop, Tablet & Smartphone</b></span></div>
       </div>
     </section>
   );
@@ -131,7 +131,7 @@ function HowItWorks() {
     { i: <ClipboardList className="h-6 w-6"/>, t: "Register", d: "Account banao bilkul FREE — koi payment nahi." },
     { i: <Sparkles className="h-6 w-6"/>, t: "30 Days Learning", d: "Roz ek naya topic + 5 MCQs." },
     { i: <GraduationCap className="h-6 w-6"/>, t: "Final Exam", d: "30 questions, 45 minutes." },
-    { i: <Trophy className="h-6 w-6"/>, t: "Win Prizes", d: "Cash + certificate + gift." },
+    { i: <Trophy className="h-6 w-6"/>, t: "Win Prizes", d: "Laptop, Tablet, Phone + certificate." },
   ];
   return (
     <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
@@ -155,16 +155,16 @@ function HowItWorks() {
 
 function Prizes() {
   const items = [
-    { p: 2000, place: "1st Place", grad: "bg-gradient-gold", emoji: "🥇", note: "Plus certificate + gift" },
-    { p: 1000, place: "2nd Place", grad: "bg-gradient-silver", emoji: "🥈", note: "Plus certificate + gift" },
-    { p: 500,  place: "3rd Place", grad: "bg-gradient-bronze", emoji: "🥉", note: "Plus certificate + gift" },
+    { prize: "Laptop",     place: "1st Place", grad: "bg-gradient-gold",   emoji: "💻", note: "Plus certificate + gift" },
+    { prize: "Tablet",     place: "2nd Place", grad: "bg-gradient-silver", emoji: "📱", note: "Plus certificate + gift" },
+    { prize: "Smartphone", place: "3rd Place", grad: "bg-gradient-bronze", emoji: "📲", note: "Plus certificate + gift" },
   ];
   return (
     <section className="bg-accent/40 py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-sm font-semibold uppercase tracking-widest text-primary">Prizes</p>
-          <h2 className="mt-2 text-3xl font-bold sm:text-4xl">Cash prizes worth <span className="text-gradient">₹3,500</span></h2>
+          <h2 className="mt-2 text-3xl font-bold sm:text-4xl">Top 3 winners ko <span className="text-gradient">Laptop, Tablet & Phone</span></h2>
           <p className="mt-3 text-muted-foreground">Aur har participant ko special gift + digital certificate guaranteed!</p>
         </div>
         <div className="mt-12 grid gap-6 md:grid-cols-3">
@@ -173,7 +173,7 @@ function Prizes() {
               <div className="rounded-[22px] bg-card p-7 text-center">
                 <div className="text-5xl">{it.emoji}</div>
                 <div className="mt-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">{it.place}</div>
-                <div className="mt-2 text-5xl font-extrabold">₹{it.p.toLocaleString("en-IN")}</div>
+                <div className="mt-2 text-4xl font-extrabold">{it.prize}</div>
                 <div className="mt-2 text-xs text-muted-foreground">{it.note}</div>
               </div>
             </div>

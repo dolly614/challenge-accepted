@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { useEffect, useState } from "react";
-import { ShieldCheck, CreditCard, Lock, BadgeCheck } from "lucide-react";
+import { ShieldCheck, Lock, BadgeCheck } from "lucide-react";
 import { attributeReferral, getTeacherByCode } from "@/lib/teachers";
 
 export const Route = createFileRoute("/register")({

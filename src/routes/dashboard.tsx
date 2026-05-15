@@ -28,7 +28,9 @@ function Dashboard() {
 
   const topics = getTopicsForClass(parseInt(student.cls) || 5);
   const pct = Math.round((completed.length / TOTAL_DAYS) * 100);
-  const examUnlocked = completed.length >= TOTAL_DAYS;
+  const midExamUnlocked = completed.length >= 15;
+  const finalExamUnlocked = completed.length >= TOTAL_DAYS;
+  const examUnlocked = midExamUnlocked; // any exam available
   const examScoreRaw = typeof window !== "undefined" ? localStorage.getItem("examScore") : null;
   const examScore = examScoreRaw ? parseInt(examScoreRaw) : null;
   const certificateReady = examScore !== null;
@@ -113,23 +115,30 @@ function Dashboard() {
                   Start Today's Task →
                 </Link>
               ) : (
-                <Link to="/exam" className="mt-4 inline-flex h-10 items-center rounded-full bg-card px-5 text-sm font-semibold text-primary shadow-soft hover:scale-[1.03]">
-                  Take Final Exam →
+                <Link to="/exam" search={{ type: finalExamUnlocked ? "final" : "mid" }} className="mt-4 inline-flex h-10 items-center rounded-full bg-card px-5 text-sm font-semibold text-primary shadow-soft hover:scale-[1.03]">
+                  Take {finalExamUnlocked ? "Final" : "Mid"} Exam →
                 </Link>
               )}
             </div>
 
             <div className="rounded-3xl border border-border bg-card p-6 shadow-card">
               <div className="flex items-center gap-2 text-sm font-bold">
-                <Trophy className={`h-4 w-4 ${examUnlocked ? "text-saffron" : "text-muted-foreground"}`}/>
-                Final Exam
+                <Trophy className={`h-4 w-4 ${midExamUnlocked ? "text-saffron" : "text-muted-foreground"}`}/>
+                Exams
               </div>
-              <p className="mt-2 text-sm text-muted-foreground">Unlocks after Day 30 is completed.</p>
-              {examUnlocked ? (
-                <Link to="/exam" className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-full bg-secondary text-sm font-semibold text-secondary-foreground">Start Exam</Link>
-              ) : (
-                <button disabled className="mt-3 inline-flex h-10 w-full items-center justify-center gap-2 rounded-full bg-muted text-sm font-semibold text-muted-foreground"><Lock className="h-3 w-3"/> Locked</button>
-              )}
+              <p className="mt-2 text-xs text-muted-foreground">Registration FREE hai. Exam fee sirf exam dene ke time pe.</p>
+              <div className="mt-3 space-y-2">
+                {midExamUnlocked ? (
+                  <Link to="/exam" search={{ type: "mid" }} className="flex h-10 w-full items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">Mid Exam (15 Days) · ₹49</Link>
+                ) : (
+                  <button disabled className="flex h-10 w-full items-center justify-center gap-2 rounded-full bg-muted text-xs font-semibold text-muted-foreground"><Lock className="h-3 w-3"/> Mid Exam — Day 15 pe unlock</button>
+                )}
+                {finalExamUnlocked ? (
+                  <Link to="/exam" search={{ type: "final" }} className="flex h-10 w-full items-center justify-center rounded-full bg-gradient-hero text-xs font-semibold text-primary-foreground">Final Exam (30 Days) · ₹99</Link>
+                ) : (
+                  <button disabled className="flex h-10 w-full items-center justify-center gap-2 rounded-full bg-muted text-xs font-semibold text-muted-foreground"><Lock className="h-3 w-3"/> Final Exam — Day 30 pe unlock</button>
+                )}
+              </div>
             </div>
 
             <button

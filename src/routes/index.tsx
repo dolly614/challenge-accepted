@@ -10,7 +10,7 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "30 Days Learning Challenge — Seekho, Compete Karo, Jeeto!" },
-      { name: "description", content: "India's biggest 30-day daily learning competition for Class 1–12. Register at ₹99, win up to ₹2000 + certificate." },
+      { name: "description", content: "India's biggest 30-day daily learning competition for Class 1–12. FREE registration. Win up to ₹2000 + certificate." },
       { property: "og:title", content: "30 Days Learning Challenge" },
       { property: "og:description", content: "Seekho, Compete Karo, Jeeto! Daily learning challenge for Indian students." },
     ],
@@ -51,11 +51,11 @@ function Hero() {
             Seekho. <span className="text-gradient">Compete Karo.</span> <span className="text-secondary">Jeeto!</span>
           </h1>
           <p className="mt-5 max-w-lg text-base text-muted-foreground sm:text-lg">
-            India ka sabse exciting 30-day learning challenge. Roz ek topic, ek exam aur jeeto cash prizes up to ₹2,000 — sirf ₹99 mein.
+            India ka sabse exciting 30-day learning challenge. Roz ek topic, ek exam aur jeeto cash prizes up to ₹2,000 — - registration FREE, exam fee sirf challenge complete karne ke baad.
           </p>
           <div className="mt-7 flex flex-wrap items-center gap-3">
             <Link to="/register" className="inline-flex h-12 items-center rounded-full bg-gradient-hero px-7 text-sm font-semibold text-primary-foreground shadow-soft transition hover:scale-[1.03]">
-              Register Now ₹99
+              Register FREE
             </Link>
             <Link to="/leaderboard" className="inline-flex h-12 items-center rounded-full border border-border bg-card px-7 text-sm font-semibold transition hover:bg-accent">
               View Leaderboard
@@ -128,7 +128,7 @@ function SocialProof() {
 
 function HowItWorks() {
   const steps = [
-    { i: <ClipboardList className="h-6 w-6"/>, t: "Register", d: "Sirf ₹99 mein apna account banao." },
+    { i: <ClipboardList className="h-6 w-6"/>, t: "Register", d: "Account banao bilkul FREE — koi payment nahi." },
     { i: <Sparkles className="h-6 w-6"/>, t: "30 Days Learning", d: "Roz ek naya topic + 5 MCQs." },
     { i: <GraduationCap className="h-6 w-6"/>, t: "Final Exam", d: "30 questions, 45 minutes." },
     { i: <Trophy className="h-6 w-6"/>, t: "Win Prizes", d: "Cash + certificate + gift." },
@@ -194,7 +194,7 @@ function Countdown2() {
             <h2 className="mt-2 text-3xl font-bold sm:text-4xl">Registration closes in</h2>
             <p className="mt-2 max-w-md opacity-90">Next batch shuru hone wala hai. Apni seat aaj hi book kar lo.</p>
             <Link to="/register" className="mt-6 inline-flex h-12 items-center rounded-full bg-card px-7 text-sm font-semibold text-primary shadow-soft transition hover:scale-[1.03]">
-              Register Now ₹99
+              Register FREE
             </Link>
           </div>
           <div className="flex justify-center md:justify-end"><Countdown /></div>
@@ -255,7 +255,7 @@ function CTA() {
         <h2 className="text-3xl font-bold sm:text-4xl">Ready ho? <span className="text-gradient">Challenge accept karo!</span></h2>
         <p className="mx-auto mt-3 max-w-xl text-muted-foreground">12,847+ students already in. Aap kab join karoge?</p>
         <Link to="/register" className="mt-7 inline-flex h-12 items-center rounded-full bg-gradient-hero px-8 text-sm font-semibold text-primary-foreground shadow-soft transition hover:scale-[1.03]">
-          Register Now ₹99
+          Register FREE
         </Link>
       </div>
     </section>
@@ -265,7 +265,7 @@ function CTA() {
 function StickyCta() {
   return (
     <Link to="/register" className="fixed bottom-4 left-1/2 z-50 inline-flex h-12 -translate-x-1/2 items-center gap-2 rounded-full bg-gradient-hero px-6 text-sm font-semibold text-primary-foreground shadow-soft md:hidden">
-      <Trophy className="h-4 w-4" /> Register Now ₹99
+      <Trophy className="h-4 w-4" /> Register FREE
     </Link>
   );
 }

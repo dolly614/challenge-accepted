@@ -22,7 +22,7 @@ export function Header() {
           to="/register"
           className="inline-flex h-10 items-center rounded-full bg-gradient-hero px-5 text-sm font-semibold text-primary-foreground shadow-soft transition hover:scale-[1.03]"
         >
-          Register ₹99
+          Register FREE
         </Link>
       </div>
     </header>

@@ -2,12 +2,12 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { useEffect, useState } from "react";
-import { ShieldCheck, CreditCard, Lock, BadgeCheck } from "lucide-react";
+import { ShieldCheck, Lock, BadgeCheck } from "lucide-react";
 import { attributeReferral, getTeacherByCode } from "@/lib/teachers";
 
 export const Route = createFileRoute("/register")({
   validateSearch: (s: Record<string, unknown>) => ({ ref: typeof s.ref === "string" ? s.ref : undefined }),
-  head: () => ({ meta: [{ title: "Register — 30 Days Learning Challenge" }, { name: "description", content: "Apna registration sirf ₹99 mein complete karein." }] }),
+  head: () => ({ meta: [{ title: "Register Free — 30 Days Learning Challenge" }, { name: "description", content: "FREE registration. Exam fee sirf tab jab aap challenge complete karein." }] }),
   component: Register,
 });
 
@@ -30,12 +30,12 @@ function Register() {
     e.preventDefault();
     setLoading(true);
     if (typeof window !== "undefined") {
-      localStorage.setItem("student", JSON.stringify({ ...form, isPaid: true, registeredAt: Date.now() }));
+      localStorage.setItem("student", JSON.stringify({ ...form, isPaid: false, registeredAt: Date.now() }));
       if (ref) {
         attributeReferral({
           code: ref,
           studentName: form.name, studentEmail: form.email,
-          studentPhone: form.mobile, studentClass: form.cls, amount: 99,
+          studentPhone: form.mobile, studentClass: form.cls, amount: 0,
         });
       }
     }
@@ -47,8 +47,8 @@ function Register() {
       <Header />
       <section className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-5">
         <div className="md:col-span-3">
-          <h1 className="text-3xl font-bold sm:text-4xl">Apna account banao 🚀</h1>
-          <p className="mt-2 text-muted-foreground">Registration sirf ₹99 — 30 din ka content + final exam + certificate.</p>
+          <h1 className="text-3xl font-bold sm:text-4xl">Free Registration 🚀</h1>
+          <p className="mt-2 text-muted-foreground">Abhi register karo <b>FREE</b>. Exam fee sirf tab dena jab aap 15-day ya 30-day challenge complete karein.</p>
           {referrer && (
             <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-secondary/30 bg-secondary/10 px-4 py-2 text-xs font-semibold text-secondary">
               <BadgeCheck className="h-4 w-4"/> Referred by <b className="text-foreground">{referrer.name}</b> · code {referrer.code}
@@ -71,26 +71,28 @@ function Register() {
             </div>
             <Field label="Password"><input required type="password" minLength={6} value={form.password} onChange={upd("password")} placeholder="Min 6 characters" className={fieldCls}/></Field>
             <button disabled={loading} className="mt-2 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-gradient-hero text-sm font-semibold text-primary-foreground shadow-soft transition hover:scale-[1.01] disabled:opacity-60">
-              <CreditCard className="h-4 w-4"/> {loading ? "Processing..." : "Pay ₹99 & Register"}
+              <BadgeCheck className="h-4 w-4"/> {loading ? "Creating account..." : "Register FREE & Start Challenge"}
             </button>
             <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-              <Lock className="h-3 w-3"/> Secured by Razorpay (test mode)
+              <Lock className="h-3 w-3"/> Koi payment nahi. Exam time pe pay karein.
             </div>
           </form>
         </div>
         <aside className="md:col-span-2">
           <div className="sticky top-24 space-y-4">
             <div className="rounded-3xl border border-border bg-card p-6 shadow-card">
-              <div className="text-sm font-semibold text-primary">Order Summary</div>
-              <div className="mt-4 flex justify-between text-sm"><span>30 Days Challenge Access</span><span>₹99</span></div>
-              <div className="mt-2 flex justify-between text-sm text-muted-foreground"><span>Taxes</span><span>Included</span></div>
-              <div className="mt-4 border-t border-border pt-4 flex justify-between font-bold"><span>Total</span><span>₹99</span></div>
+              <div className="text-sm font-semibold text-primary">Pay-Later Pricing</div>
+              <div className="mt-4 flex justify-between text-sm"><span>Registration</span><span className="font-bold text-secondary">FREE</span></div>
+              <div className="mt-2 flex justify-between text-sm"><span>15-Day Mid Exam (optional)</span><span>₹49</span></div>
+              <div className="mt-2 flex justify-between text-sm"><span>30-Day Final Exam</span><span>₹99</span></div>
+              <div className="mt-4 border-t border-border pt-4 text-xs text-muted-foreground">Exam fee sirf tab jab aap exam dena chaho. Challenge complete karne ke baad pay karein.</div>
             </div>
             <div className="rounded-3xl border border-border bg-accent/60 p-6">
               <div className="flex items-center gap-2 text-sm font-semibold"><ShieldCheck className="h-4 w-4 text-secondary"/> Aapko milega:</div>
               <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-                <li>✅ 30 din ka daily learning content</li>
-                <li>✅ Final exam (30 MCQs)</li>
+                <li>✅ FREE registration — abhi shuru karein</li>
+                <li>✅ 15-day Mid exam ya 30-day Final exam — choose karo</li>
+                <li>✅ Exam fee sirf challenge complete karne ke baad</li>
                 <li>✅ Digital certificate</li>
                 <li>✅ Cash prize chance ₹2,000 tak</li>
                 <li>✅ Special participation gift</li>

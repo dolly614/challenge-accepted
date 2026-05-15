@@ -2,37 +2,88 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { useEffect, useState } from "react";
-import { Clock, Trophy, Award } from "lucide-react";
+import { Clock, Trophy, Award, CreditCard, Lock, ShieldCheck } from "lucide-react";
 import { generateCertificate } from "@/lib/certificate";
 
 export const Route = createFileRoute("/exam")({
+  validateSearch: (s: Record<string, unknown>) => ({ type: s.type === "final" ? "final" as const : "mid" as const }),
   head: () => ({ meta: [{ title: "Final Exam — 30 Days Challenge" }] }),
   component: Exam,
 });
 
-const QS = Array.from({ length: 30 }).map((_, i) => ({
-  q: `Question ${i + 1}: Sample MCQ for the final exam`,
-  opts: ["Option A", "Option B", "Option C", "Option D"],
-  a: i % 4,
-}));
-
 function Exam() {
-  const [answers, setAnswers] = useState<number[]>(Array(30).fill(-1));
-  const [time, setTime] = useState(45 * 60);
+  const { type } = Route.useSearch();
+  const isFinal = type === "final";
+  const totalQs = isFinal ? 30 : 15;
+  const fee = isFinal ? 99 : 49;
+  const examLabel = isFinal ? "Final Exam (30 Days)" : "Mid Exam (15 Days)";
+  const durationMin = isFinal ? 45 : 25;
+
+  const QS = Array.from({ length: totalQs }).map((_, i) => ({
+    q: `Question ${i + 1}: Sample MCQ for the ${isFinal ? "final" : "mid"} exam`,
+    opts: ["Option A", "Option B", "Option C", "Option D"],
+    a: i % 4,
+  }));
+
+  const paidKey = isFinal ? "examPaid_final" : "examPaid_mid";
+  const [paid, setPaid] = useState(false);
+  const [paying, setPaying] = useState(false);
+  useEffect(() => {
+    if (typeof window !== "undefined") setPaid(localStorage.getItem(paidKey) === "1");
+  }, [paidKey]);
+
+  const [answers, setAnswers] = useState<number[]>(Array(totalQs).fill(-1));
+  const [time, setTime] = useState(durationMin * 60);
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    if (done) return;
+    if (done || !paid) return;
     const id = setInterval(() => setTime(t => {
       if (t <= 1) { clearInterval(id); setDone(true); return 0; }
       return t - 1;
     }), 1000);
     return () => clearInterval(id);
-  }, [done]);
+  }, [done, paid]);
 
   const score = answers.reduce((s, a, i) => s + (a === QS[i].a ? 1 : 0), 0);
   const mm = String(Math.floor(time / 60)).padStart(2, "0");
   const ss = String(time % 60).padStart(2, "0");
+
+  function handlePay() {
+    setPaying(true);
+    setTimeout(() => {
+      if (typeof window !== "undefined") localStorage.setItem(paidKey, "1");
+      setPaid(true);
+      setPaying(false);
+    }, 900);
+  }
+
+  if (!paid && !done) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <section className="mx-auto max-w-xl px-4 py-16 sm:px-6">
+          <div className="rounded-3xl border border-border bg-card p-8 shadow-card text-center">
+            <Lock className="mx-auto h-12 w-12 text-primary"/>
+            <h1 className="mt-4 text-2xl font-bold">{examLabel}</h1>
+            <p className="mt-2 text-sm text-muted-foreground">Aapne challenge complete kar liya hai 🎉. Exam dene ke liye one-time fee pay karein.</p>
+            <div className="mt-6 rounded-2xl border border-border bg-accent/40 p-5 text-left text-sm">
+              <div className="flex justify-between"><span>{examLabel}</span><span className="font-semibold">₹{fee}</span></div>
+              <div className="mt-1 flex justify-between text-xs text-muted-foreground"><span>{totalQs} MCQs · {durationMin} mins</span><span>One-time</span></div>
+              <div className="mt-3 border-t border-border pt-3 flex justify-between font-bold"><span>Total</span><span>₹{fee}</span></div>
+            </div>
+            <button onClick={handlePay} disabled={paying} className="mt-6 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-gradient-hero text-sm font-semibold text-primary-foreground shadow-soft disabled:opacity-60">
+              <CreditCard className="h-4 w-4"/> {paying ? "Processing..." : `Pay ₹${fee} & Start Exam`}
+            </button>
+            <div className="mt-3 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
+              <ShieldCheck className="h-3 w-3"/> Secure Razorpay (test mode)
+            </div>
+          </div>
+        </section>
+        <Footer />
+      </div>
+    );
+  }
 
   if (done) {
     if (typeof window !== "undefined") {
@@ -47,9 +98,9 @@ function Exam() {
         <Header />
         <section className="mx-auto max-w-2xl px-4 py-16 text-center sm:px-6">
           <Trophy className="mx-auto h-16 w-16 text-saffron"/>
-          <h1 className="mt-4 text-4xl font-bold">Exam Complete! 🎉</h1>
+          <h1 className="mt-4 text-4xl font-bold">{examLabel} Complete! 🎉</h1>
           <p className="mt-2 text-muted-foreground">Aapka score</p>
-          <div className="mt-4 text-6xl font-extrabold text-gradient">{score}/30</div>
+          <div className="mt-4 text-6xl font-extrabold text-gradient">{score}/{totalQs}</div>
           <p className="mt-3 text-sm text-muted-foreground">Final ranks calculate hone ke baad leaderboard pe dekho.</p>
           <button
             onClick={() => generateCertificate({ name: student.name, cls: student.cls, score })}
@@ -68,7 +119,7 @@ function Exam() {
       <Header />
       <div className="sticky top-16 z-30 border-b border-border bg-background/90 backdrop-blur">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3 sm:px-6">
-          <div className="text-sm font-semibold">Final Exam • 30 Questions</div>
+          <div className="text-sm font-semibold">{examLabel} • {totalQs} Questions</div>
           <div className={`flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-bold ${time < 300 ? "bg-destructive/15 text-destructive" : "bg-primary/10 text-primary"}`}>
             <Clock className="h-4 w-4"/> {mm}:{ss}
           </div>

@@ -4,6 +4,7 @@ import { Footer } from "@/components/site/Footer";
 import { useEffect, useState } from "react";
 import { ShieldCheck, Lock, BadgeCheck, IdCard, Upload, CheckCircle2 } from "lucide-react";
 import { attributeReferral, getTeacherByCode } from "@/lib/teachers";
+import { BrandMark } from "@/components/site/BrandMark";
 
 export const Route = createFileRoute("/register")({
   validateSearch: (s: Record<string, unknown>) => ({ ref: typeof s.ref === "string" ? s.ref : undefined }),
@@ -70,7 +71,13 @@ function Register() {
       <Header />
       <section className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-5">
         <div className="md:col-span-3">
-          <h1 className="text-3xl font-bold sm:text-4xl">Free Registration 🚀</h1>
+          <div className="flex items-center gap-3">
+            <BrandMark size={56} />
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-wider text-primary">Uyanix 30 Days Challenge</div>
+              <h1 className="text-3xl font-bold leading-tight sm:text-4xl">Free Registration 🚀</h1>
+            </div>
+          </div>
           <p className="mt-2 text-muted-foreground">Abhi register karo <b>FREE</b>. Exam fee sirf tab dena jab aap 15-day ya 30-day challenge complete karein.</p>
           {referrer && (
             <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-secondary/30 bg-secondary/10 px-4 py-2 text-xs font-semibold text-secondary">

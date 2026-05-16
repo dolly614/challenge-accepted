@@ -7,6 +7,7 @@ import { Download, Lock, Users, IndianRupee, GraduationCap, Gift } from "lucide-
 import { ChaptersManager } from "@/components/admin/ChaptersManager";
 import { BulkImport } from "@/components/admin/BulkImport";
 import { TeachersPanel } from "@/components/admin/TeachersPanel";
+import { BrandPanel } from "@/components/admin/BrandPanel";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — Uyanix 30 Days Challenge" }] }),
@@ -102,6 +103,7 @@ function Admin() {
         <BulkImport />
         <ChaptersManager />
         <TeachersPanel />
+        <BrandPanel />
       </section>
       <Footer />
     </div>

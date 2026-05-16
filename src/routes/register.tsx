@@ -83,8 +83,8 @@ function Register() {
             <div className="rounded-3xl border border-border bg-card p-6 shadow-card">
               <div className="text-sm font-semibold text-primary">Pay-Later Pricing</div>
               <div className="mt-4 flex justify-between text-sm"><span>Registration</span><span className="font-bold text-secondary">FREE</span></div>
-              <div className="mt-2 flex justify-between text-sm"><span>15-Day Mid Exam (optional)</span><span>₹49</span></div>
-              <div className="mt-2 flex justify-between text-sm"><span>30-Day Final Exam</span><span>₹99</span></div>
+              <div className="mt-2 flex justify-between text-sm"><span>15-Day Mid Exam (optional)</span><span>₹199</span></div>
+              <div className="mt-2 flex justify-between text-sm"><span>30-Day Final Exam</span><span>₹199</span></div>
               <div className="mt-4 border-t border-border pt-4 text-xs text-muted-foreground">Exam fee sirf tab jab aap exam dena chaho. Challenge complete karne ke baad pay karein.</div>
             </div>
             <div className="rounded-3xl border border-border bg-accent/60 p-6">

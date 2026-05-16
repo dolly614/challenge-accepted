@@ -15,7 +15,7 @@ function Exam() {
   const { type } = Route.useSearch();
   const isFinal = type === "final";
   const totalQs = isFinal ? 30 : 15;
-  const fee = isFinal ? 99 : 49;
+  const fee = 199;
   const examLabel = isFinal ? "Final Exam (30 Days)" : "Mid Exam (15 Days)";
   const durationMin = isFinal ? 45 : 25;
 

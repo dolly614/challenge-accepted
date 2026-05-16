@@ -31,7 +31,7 @@ export function generateCertificate(opts: {
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
-  doc.text("30 Days Learning Challenge", W / 2, 70, { align: "center" });
+  doc.text("Uyanix 30 Days Challenge", W / 2, 70, { align: "center" });
 
   // Title
   doc.setTextColor(40, 40, 60);
@@ -59,7 +59,7 @@ export function generateCertificate(opts: {
   doc.setFont("helvetica", "normal");
   doc.setFontSize(13);
   doc.setTextColor(70, 70, 90);
-  const body = `Class ${cls} • For successfully completing the 30 Days Learning Challenge${
+  const body = `Class ${cls} • For successfully completing the Uyanix 30 Days Challenge${
     typeof score === "number" ? ` with a final score of ${score}/${total}` : ""
   }${rank ? ` and securing rank #${rank}` : ""}.`;
   doc.text(body, W / 2, 300, { align: "center", maxWidth: W - 160 });
@@ -81,7 +81,7 @@ export function generateCertificate(opts: {
   doc.setTextColor(80, 80, 100);
   doc.text(date, 200, H - 92, { align: "center" });
   doc.text("Date", 200, H - 78, { align: "center" });
-  doc.text("30 Days Challenge Team", W - 200, H - 92, { align: "center" });
+  doc.text("Uyanix 30 Days Challenge Team", W - 200, H - 92, { align: "center" });
   doc.text("Authorised Signatory", W - 200, H - 78, { align: "center" });
 
   // Footer ribbon

@@ -6,7 +6,7 @@ import { leaderboardSample } from "@/lib/data/challenge";
 import { RefreshCw } from "lucide-react";
 
 export const Route = createFileRoute("/leaderboard")({
-  head: () => ({ meta: [{ title: "Leaderboard — 30 Days Challenge" }] }),
+  head: () => ({ meta: [{ title: "Leaderboard — Uyanix 30 Days Challenge" }] }),
   component: Lb,
 });
 

@@ -9,9 +9,9 @@ import { ClipboardList, GraduationCap, Sparkles, Trophy, Flame, ShieldCheck, Sta
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "30 Days Learning Challenge — Seekho, Compete Karo, Jeeto!" },
+      { title: "Uyanix 30 Days Challenge — Seekho, Compete Karo, Jeeto!" },
       { name: "description", content: "India's biggest 30-day daily learning competition for Class 1–12. FREE registration. Win Laptop, Tablet & Smartphone + certificate." },
-      { property: "og:title", content: "30 Days Learning Challenge" },
+      { property: "og:title", content: "Uyanix 30 Days Challenge" },
       { property: "og:description", content: "Seekho, Compete Karo, Jeeto! Daily learning challenge for Indian students." },
     ],
   }),

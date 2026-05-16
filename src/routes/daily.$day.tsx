@@ -7,7 +7,7 @@ import { getChapter } from "@/lib/chapters";
 import { CheckCircle2, ArrowRight, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/daily/$day")({
-  head: () => ({ meta: [{ title: "Aaj ka task — 30 Days Challenge" }] }),
+  head: () => ({ meta: [{ title: "Aaj ka task — Uyanix 30 Days Challenge" }] }),
   component: Daily,
 });
 

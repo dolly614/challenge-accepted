@@ -8,7 +8,7 @@ export function Footer() {
         <div className="md:col-span-2">
           <div className="flex items-center gap-2 font-bold">
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-hero text-primary-foreground"><Trophy className="h-5 w-5"/></div>
-            <span>Uyanix Uyanix 30 Days Challenge</span>
+            <span>Uyanix 30 Days Challenge</span>
           </div>
           <p className="mt-3 max-w-md text-sm text-muted-foreground">
             India's most exciting daily learning competition for Class 1–12 students. Seekho, Compete Karo, Jeeto!
@@ -33,7 +33,7 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-border py-4 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} Uyanix Uyanix 30 Days Challenge. Made in India 🇮🇳
+        © {new Date().getFullYear()} Uyanix 30 Days Challenge. Made in India 🇮🇳
       </div>
     </footer>
   );

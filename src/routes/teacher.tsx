@@ -15,7 +15,7 @@ import {
 export const Route = createFileRoute("/teacher")({
   head: () => ({ meta: [
     { title: "Teacher Portal — Uyanix 30 Days Challenge" },
-    { name: "description", content: "Earn ₹10–₹20 per verified student you refer to the Uyanix Uyanix 30 Days Challenge." },
+    { name: "description", content: "Earn ₹10–₹20 per verified student you refer to the Uyanix 30 Days Challenge." },
   ]}),
   component: TeacherPortal,
 });
@@ -327,7 +327,7 @@ function ReferralCard({ link, code }: { link: string; code: string }) {
   const [qr, setQr] = useState<string>("");
   const [copied, setCopied] = useState(false);
   useEffect(() => { QRCode.toDataURL(link, { margin: 1, width: 220 }).then(setQr).catch(() => {}); }, [link]);
-  const msg = encodeURIComponent(`Join Uyanix Uyanix 30 Days Challenge with my code ${code} → ${link}`);
+  const msg = encodeURIComponent(`Join Uyanix 30 Days Challenge with my code ${code} → ${link}`);
   return (
     <div className="rounded-3xl border border-border bg-card p-6 shadow-card lg:col-span-1">
       <div className="mb-3 flex items-center gap-2 text-sm font-bold"><QrCode className="h-4 w-4"/> Your Referral</div>

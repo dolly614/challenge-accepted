@@ -129,12 +129,12 @@ function Dashboard() {
               <p className="mt-2 text-xs text-muted-foreground">Registration FREE hai. Exam fee sirf exam dene ke time pe.</p>
               <div className="mt-3 space-y-2">
                 {midExamUnlocked ? (
-                  <Link to="/exam" search={{ type: "mid" }} className="flex h-10 w-full items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">Mid Exam (15 Days) · ₹49</Link>
+                  <Link to="/exam" search={{ type: "mid" }} className="flex h-10 w-full items-center justify-center rounded-full bg-secondary text-xs font-semibold text-secondary-foreground">Mid Exam (15 Days) · ₹199</Link>
                 ) : (
                   <button disabled className="flex h-10 w-full items-center justify-center gap-2 rounded-full bg-muted text-xs font-semibold text-muted-foreground"><Lock className="h-3 w-3"/> Mid Exam — Day 15 pe unlock</button>
                 )}
                 {finalExamUnlocked ? (
-                  <Link to="/exam" search={{ type: "final" }} className="flex h-10 w-full items-center justify-center rounded-full bg-gradient-hero text-xs font-semibold text-primary-foreground">Final Exam (30 Days) · ₹99</Link>
+                  <Link to="/exam" search={{ type: "final" }} className="flex h-10 w-full items-center justify-center rounded-full bg-gradient-hero text-xs font-semibold text-primary-foreground">Final Exam (30 Days) · ₹199</Link>
                 ) : (
                   <button disabled className="flex h-10 w-full items-center justify-center gap-2 rounded-full bg-muted text-xs font-semibold text-muted-foreground"><Lock className="h-3 w-3"/> Final Exam — Day 30 pe unlock</button>
                 )}

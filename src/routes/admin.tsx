@@ -9,7 +9,7 @@ import { BulkImport } from "@/components/admin/BulkImport";
 import { TeachersPanel } from "@/components/admin/TeachersPanel";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin — 30 Days Challenge" }] }),
+  head: () => ({ meta: [{ title: "Admin — Uyanix 30 Days Challenge" }] }),
   component: Admin,
 });
 

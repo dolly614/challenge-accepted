@@ -7,7 +7,7 @@ import { generateCertificate } from "@/lib/certificate";
 
 export const Route = createFileRoute("/exam")({
   validateSearch: (s: Record<string, unknown>) => ({ type: s.type === "final" ? "final" as const : "mid" as const }),
-  head: () => ({ meta: [{ title: "Final Exam — 30 Days Challenge" }] }),
+  head: () => ({ meta: [{ title: "Final Exam — Uyanix 30 Days Challenge" }] }),
   component: Exam,
 });
 

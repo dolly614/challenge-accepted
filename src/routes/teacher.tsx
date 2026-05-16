@@ -14,8 +14,8 @@ import {
 
 export const Route = createFileRoute("/teacher")({
   head: () => ({ meta: [
-    { title: "Teacher Portal — 30 Days Challenge" },
-    { name: "description", content: "Earn ₹10–₹20 per verified student you refer to the 30 Days Learning Challenge." },
+    { title: "Teacher Portal — Uyanix 30 Days Challenge" },
+    { name: "description", content: "Earn ₹10–₹20 per verified student you refer to the Uyanix Uyanix 30 Days Challenge." },
   ]}),
   component: TeacherPortal,
 });
@@ -56,7 +56,7 @@ function AuthCard({ mode, setMode, onAuth }: { mode: "login" | "register"; setMo
           <Sparkles className="h-3.5 w-3.5 text-primary" /> Teacher Earnings Program
         </div>
         <h1 className="text-3xl font-extrabold sm:text-4xl">Refer karein, kamayein <span className="text-gradient">₹20/student</span> tak</h1>
-        <p className="text-muted-foreground">Apne students ko 30 Days Challenge mein invite karein aur paid signup pe seedha commission paayein. UPI ya bank withdraw — minimum ₹{MIN_WITHDRAW}.</p>
+        <p className="text-muted-foreground">Apne students ko Uyanix 30 Days Challenge mein invite karein aur paid signup pe seedha commission paayein. UPI ya bank withdraw — minimum ₹{MIN_WITHDRAW}.</p>
         <ul className="mt-4 space-y-2 text-sm">
           <li className="flex items-center gap-2"><BadgeCheck className="h-4 w-4 text-secondary"/> Sirf verified paid signup pe commission</li>
           <li className="flex items-center gap-2"><BadgeCheck className="h-4 w-4 text-secondary"/> 1–50: ₹10 · 51–200: ₹15 · 200+: ₹20</li>
@@ -327,7 +327,7 @@ function ReferralCard({ link, code }: { link: string; code: string }) {
   const [qr, setQr] = useState<string>("");
   const [copied, setCopied] = useState(false);
   useEffect(() => { QRCode.toDataURL(link, { margin: 1, width: 220 }).then(setQr).catch(() => {}); }, [link]);
-  const msg = encodeURIComponent(`Join 30 Days Learning Challenge with my code ${code} → ${link}`);
+  const msg = encodeURIComponent(`Join Uyanix Uyanix 30 Days Challenge with my code ${code} → ${link}`);
   return (
     <div className="rounded-3xl border border-border bg-card p-6 shadow-card lg:col-span-1">
       <div className="mb-3 flex items-center gap-2 text-sm font-bold"><QrCode className="h-4 w-4"/> Your Referral</div>
@@ -341,7 +341,7 @@ function ReferralCard({ link, code }: { link: string; code: string }) {
         <a target="_blank" rel="noreferrer" href={`https://wa.me/?text=${msg}`} className="rounded-lg border border-border py-2 text-center hover:bg-accent">WhatsApp</a>
         <a target="_blank" rel="noreferrer" href={`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${msg}`} className="rounded-lg border border-border py-2 text-center hover:bg-accent">Telegram</a>
         <a target="_blank" rel="noreferrer" href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(link)}`} className="rounded-lg border border-border py-2 text-center hover:bg-accent">Facebook</a>
-        <button onClick={() => { if (navigator.share) navigator.share({ url: link, title: "30 Days Challenge", text: "Join with my code " + code }); }}
+        <button onClick={() => { if (navigator.share) navigator.share({ url: link, title: "Uyanix 30 Days Challenge", text: "Join with my code " + code }); }}
           className="rounded-lg border border-border py-2 hover:bg-accent inline-flex items-center justify-center gap-1"><Share2 className="h-3 w-3"/>More</button>
       </div>
     </div>

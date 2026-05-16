@@ -7,7 +7,7 @@ import { Flame, Lock, Trophy, Award, Share2, CheckCircle2 } from "lucide-react";
 import { generateCertificate } from "@/lib/certificate";
 
 export const Route = createFileRoute("/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — 30 Days Challenge" }] }),
+  head: () => ({ meta: [{ title: "Dashboard — Uyanix 30 Days Challenge" }] }),
   component: Dashboard,
 });
 
@@ -150,7 +150,7 @@ function Dashboard() {
               {certificateReady ? "Download Certificate" : "Certificate (after exam)"}
             </button>
             <a
-              href={`https://wa.me/?text=${encodeURIComponent(`I completed Day ${completed.length} of 30 Days Challenge! 🎉 Join me: ${typeof window !== "undefined" ? window.location.origin : ""}`)}`}
+              href={`https://wa.me/?text=${encodeURIComponent(`I completed Day ${completed.length} of Uyanix 30 Days Challenge! 🎉 Join me: ${typeof window !== "undefined" ? window.location.origin : ""}`)}`}
               target="_blank" rel="noreferrer"
               className="flex w-full items-center justify-center gap-2 rounded-2xl bg-secondary p-4 text-sm font-semibold text-secondary-foreground hover:opacity-90"
             >

@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Mail, Phone, Trophy } from "lucide-react";
+import { Mail, Phone } from "lucide-react";
+import { BrandMark } from "./BrandMark";
 
 export function Footer() {
   return (
@@ -7,7 +8,7 @@ export function Footer() {
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-4">
         <div className="md:col-span-2">
           <div className="flex items-center gap-2 font-bold">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-hero text-primary-foreground"><Trophy className="h-5 w-5"/></div>
+            <BrandMark size={36} />
             <span>Uyanix 30 Days Challenge</span>
           </div>
           <p className="mt-3 max-w-md text-sm text-muted-foreground">

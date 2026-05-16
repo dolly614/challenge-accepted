@@ -1,15 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { Trophy } from "lucide-react";
+import { BrandMark } from "./BrandMark";
 
 export function Header() {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur-lg">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <Link to="/" className="flex items-center gap-2 font-bold">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-hero text-primary-foreground shadow-soft">
-            <Trophy className="h-5 w-5" />
-          </div>
-          <span className="text-base sm:text-lg">30 Days <span className="text-primary">Challenge</span></span>
+          <BrandMark size={36} />
+          <span className="text-base sm:text-lg leading-tight">Uyanix <span className="text-primary">30 Days</span></span>
         </Link>
         <nav className="hidden items-center gap-6 text-sm font-medium md:flex">
           <Link to="/" className="text-muted-foreground hover:text-foreground">Home</Link>

@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { useEffect, useState } from "react";
-import { ShieldCheck, Lock, BadgeCheck } from "lucide-react";
+import { ShieldCheck, Lock, BadgeCheck, IdCard, Upload, CheckCircle2 } from "lucide-react";
 import { attributeReferral, getTeacherByCode } from "@/lib/teachers";
 
 export const Route = createFileRoute("/register")({
@@ -15,6 +15,8 @@ function Register() {
   const nav = useNavigate();
   const { ref } = Route.useSearch();
   const [form, setForm] = useState({ name: "", cls: "5", school: "", city: "", mobile: "", email: "", password: "" });
+  const [idCard, setIdCard] = useState<{ name: string; dataUrl: string } | null>(null);
+  const [idError, setIdError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [referrer, setReferrer] = useState<{ name: string; code: string } | null>(null);
 
@@ -26,11 +28,32 @@ function Register() {
 
   const upd = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm(s => ({ ...s, [k]: e.target.value }));
 
+  function onIdUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    setIdError(null);
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) {
+      setIdError("Sirf PNG / JPG / WEBP image upload karein.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setIdError("File 5MB se kam honi chahiye.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setIdCard({ name: file.name, dataUrl: String(reader.result) });
+    reader.readAsDataURL(file);
+  }
+
   function submit(e: React.FormEvent) {
     e.preventDefault();
+    if (!idCard) {
+      setIdError("Verification ke liye ID card ka photo upload karein.");
+      return;
+    }
     setLoading(true);
     if (typeof window !== "undefined") {
-      localStorage.setItem("student", JSON.stringify({ ...form, isPaid: false, registeredAt: Date.now() }));
+      localStorage.setItem("student", JSON.stringify({ ...form, idCard, isPaid: false, registeredAt: Date.now() }));
       if (ref) {
         attributeReferral({
           code: ref,
@@ -70,6 +93,25 @@ function Register() {
               <Field label="Parent Email"><input required type="email" value={form.email} onChange={upd("email")} placeholder="parent@email.com" className={fieldCls}/></Field>
             </div>
             <Field label="Password"><input required type="password" minLength={6} value={form.password} onChange={upd("password")} placeholder="Min 6 characters" className={fieldCls}/></Field>
+            <Field label="ID Card Photo (Verification)">
+              <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-dashed border-input bg-background px-4 py-3 text-sm transition hover:border-primary">
+                <span className="flex items-center gap-2 text-muted-foreground">
+                  <IdCard className="h-4 w-4 text-primary" />
+                  {idCard ? (
+                    <span className="flex items-center gap-1.5 text-foreground"><CheckCircle2 className="h-4 w-4 text-secondary" /> {idCard.name}</span>
+                  ) : (
+                    <>School ID / Aadhaar / Birth Certificate</>
+                  )}
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"><Upload className="h-3 w-3" /> {idCard ? "Change" : "Upload"}</span>
+                <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={onIdUpload} />
+              </label>
+              {idCard && (
+                <img src={idCard.dataUrl} alt="ID preview" className="mt-3 h-28 w-auto rounded-lg border border-border object-cover" />
+              )}
+              {idError && <p className="mt-1.5 text-xs font-medium text-destructive">{idError}</p>}
+              <p className="mt-1.5 text-[11px] text-muted-foreground">JPG / PNG / WEBP, max 5MB. Verification ke baad delete kar diya jata hai.</p>
+            </Field>
             <button disabled={loading} className="mt-2 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-gradient-hero text-sm font-semibold text-primary-foreground shadow-soft transition hover:scale-[1.01] disabled:opacity-60">
               <BadgeCheck className="h-4 w-4"/> {loading ? "Creating account..." : "Register FREE & Start Challenge"}
             </button>

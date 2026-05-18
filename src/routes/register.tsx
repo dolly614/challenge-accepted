@@ -3,8 +3,10 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { useEffect, useState } from "react";
 import { ShieldCheck, Lock, BadgeCheck, IdCard, Upload, CheckCircle2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { attributeReferral, getTeacherByCode } from "@/lib/teachers";
 import { BrandMark } from "@/components/site/BrandMark";
+import Tesseract from "tesseract.js";
 
 export const Route = createFileRoute("/register")({
   validateSearch: (s: Record<string, unknown>) => ({ ref: typeof s.ref === "string" ? s.ref : undefined }),
@@ -18,6 +20,8 @@ function Register() {
   const [form, setForm] = useState({ name: "", cls: "5", school: "", city: "", mobile: "", email: "", password: "" });
   const [idCard, setIdCard] = useState<{ name: string; dataUrl: string } | null>(null);
   const [idError, setIdError] = useState<string | null>(null);
+  const [idVerifying, setIdVerifying] = useState(false);
+  const [idVerified, setIdVerified] = useState(false);
   const [loading, setLoading] = useState(false);
   const [referrer, setReferrer] = useState<{ name: string; code: string } | null>(null);
 
@@ -29,8 +33,10 @@ function Register() {
 
   const upd = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm(s => ({ ...s, [k]: e.target.value }));
 
-  function onIdUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  async function onIdUpload(e: React.ChangeEvent<HTMLInputElement>) {
     setIdError(null);
+    setIdVerified(false);
+    setIdCard(null);
     const file = e.target.files?.[0];
     if (!file) return;
     if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) {
@@ -41,15 +47,47 @@ function Register() {
       setIdError("File 5MB se kam honi chahiye.");
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => setIdCard({ name: file.name, dataUrl: String(reader.result) });
-    reader.readAsDataURL(file);
+    const dataUrl: string = await new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(String(r.result));
+      r.onerror = () => rej(r.error);
+      r.readAsDataURL(file);
+    });
+    setIdVerifying(true);
+    try {
+      const { data } = await Tesseract.recognize(dataUrl, "eng");
+      const text = (data.text || "").replace(/\s+/g, " ");
+      // Find all 4-digit years in the document
+      const years = (text.match(/\b(19|20)\d{2}\b/g) || []).map(Number);
+      const VALID_YEARS = [2026, 2027];
+      const hasValid = years.some(y => VALID_YEARS.includes(y) || y > 2027);
+      const hasOld = years.some(y => y <= 2025);
+      if (years.length === 0) {
+        setIdError("ID card par koi valid year (2026 ya 2027) nahi mila. Kripya saaf aur naya ID card upload karein.");
+      } else if (!hasValid && hasOld) {
+        const maxYr = Math.max(...years);
+        setIdError(`Ye ID card invalid hai ❌ — ispe purana year (${maxYr}) likha hai. Sirf 2026 / 2027 wala valid ID card hi accept hoga. Fraud se bachne ke liye apna current ID card upload karein.`);
+      } else if (!hasValid) {
+        setIdError("Is ID card par valid year (2026 / 2027) detect nahi ho paya. Kripya naya ID card upload karein.");
+      } else {
+        setIdCard({ name: file.name, dataUrl });
+        setIdVerified(true);
+      }
+    } catch {
+      setIdError("ID card verify nahi ho paya. Dobara try karein ya behtar quality ka photo upload karein.");
+    } finally {
+      setIdVerifying(false);
+    }
   }
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!idCard) {
       setIdError("Verification ke liye ID card ka photo upload karein.");
+      return;
+    }
+    if (!idVerified) {
+      setIdError("ID card verify nahi hua. Valid (2026/2027) ID card upload karein.");
       return;
     }
     setLoading(true);
@@ -104,20 +142,25 @@ function Register() {
               <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-dashed border-input bg-background px-4 py-3 text-sm transition hover:border-primary">
                 <span className="flex items-center gap-2 text-muted-foreground">
                   <IdCard className="h-4 w-4 text-primary" />
-                  {idCard ? (
+                  {idVerifying ? (
+                    <span className="flex items-center gap-1.5 text-foreground"><Loader2 className="h-4 w-4 animate-spin text-primary" /> Verifying ID card…</span>
+                  ) : idCard ? (
                     <span className="flex items-center gap-1.5 text-foreground"><CheckCircle2 className="h-4 w-4 text-secondary" /> {idCard.name}</span>
                   ) : (
                     <>School ID / Aadhaar / Birth Certificate</>
                   )}
                 </span>
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"><Upload className="h-3 w-3" /> {idCard ? "Change" : "Upload"}</span>
-                <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={onIdUpload} />
+                <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" disabled={idVerifying} onChange={onIdUpload} />
               </label>
               {idCard && (
                 <img src={idCard.dataUrl} alt="ID preview" className="mt-3 h-28 w-auto rounded-lg border border-border object-cover" />
               )}
+              {idVerified && !idError && (
+                <p className="mt-1.5 text-xs font-medium text-secondary">✅ ID card verified — valid year detected.</p>
+              )}
               {idError && <p className="mt-1.5 text-xs font-medium text-destructive">{idError}</p>}
-              <p className="mt-1.5 text-[11px] text-muted-foreground">JPG / PNG / WEBP, max 5MB. Verification ke baad delete kar diya jata hai.</p>
+              <p className="mt-1.5 text-[11px] text-muted-foreground">Sirf 2026 ya 2027 valid ID card accept honge. Purane (2025 ya pehle) ID card invalid maane jayenge. JPG / PNG / WEBP, max 5MB.</p>
             </Field>
             <button disabled={loading} className="mt-2 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-gradient-hero text-sm font-semibold text-primary-foreground shadow-soft transition hover:scale-[1.01] disabled:opacity-60">
               <BadgeCheck className="h-4 w-4"/> {loading ? "Creating account..." : "Register FREE & Start Challenge"}

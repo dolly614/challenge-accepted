@@ -28,7 +28,7 @@ export function Footer() {
         <div>
           <h4 className="mb-3 text-sm font-semibold">Contact</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li className="flex items-center gap-2"><Mail className="h-4 w-4"/> support@30dayschallenge.in</li>
+            <li className="flex items-center gap-2"><Mail className="h-4 w-4"/> dollysingh1268@gmail.com</li>
             <li className="flex items-center gap-2"><Phone className="h-4 w-4"/> +91 90000 12345</li>
           </ul>
         </div>

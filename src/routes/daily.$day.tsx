@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { getTopicsForClass } from "@/lib/data/challenge";
 import { getChapter } from "@/lib/chapters";
 import { CheckCircle2, ArrowRight, Sparkles } from "lucide-react";
+import { Lock } from "lucide-react";
 
 export const Route = createFileRoute("/daily/$day")({
   head: () => ({ meta: [{ title: "Aaj ka task — Uyanix 30 Days Challenge" }] }),
@@ -24,6 +25,8 @@ function Daily() {
   const dayNum = parseInt(day) || 1;
   const nav = useNavigate();
   const [cls, setCls] = useState(5);
+  const [locked, setLocked] = useState(false);
+  const [completedCount, setCompletedCount] = useState(0);
   const [customContent, setCustomContent] = useState<string | null>(null);
   const [customTitle, setCustomTitle] = useState<string | null>(null);
   const [answers, setAnswers] = useState<number[]>(Array(5).fill(-1));
@@ -37,6 +40,12 @@ function Daily() {
     setCls(c);
     const ch = getChapter(c, dayNum);
     if (ch) { setCustomContent(ch.content); setCustomTitle(ch.title || null); }
+    let done: number[] = [];
+    try { done = JSON.parse(localStorage.getItem("completedDays") || "[]"); } catch {}
+    setCompletedCount(done.length);
+    // Sequential gate: day N opens only when days 1..N-1 are all completed
+    const allPrevDone = Array.from({ length: dayNum - 1 }, (_, i) => i + 1).every(d => done.includes(d));
+    setLocked(!allPrevDone);
   }, [dayNum]);
 
   const topics = getTopicsForClass(cls);
@@ -56,6 +65,23 @@ function Daily() {
     <div className="min-h-screen bg-background">
       <Header />
       {confetti && <ConfettiBurst />}
+      {locked ? (
+        <section className="mx-auto max-w-2xl px-4 py-16 sm:px-6 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+            <Lock className="h-7 w-7 text-muted-foreground" />
+          </div>
+          <h1 className="mt-4 text-2xl font-bold sm:text-3xl">Day {dayNum} abhi locked hai 🔒</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Aapko days step by step complete karne hain. Pehle Day {completedCount + 1} complete karo, uske baad agla din apne aap unlock ho jayega.
+          </p>
+          <button
+            onClick={() => nav({ to: "/daily/$day", params: { day: String(completedCount + 1) } })}
+            className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-primary px-6 text-sm font-semibold text-primary-foreground"
+          >
+            Day {completedCount + 1} pe jao <ArrowRight className="h-4 w-4" />
+          </button>
+        </section>
+      ) : (
       <section className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
         <div className="text-xs font-semibold uppercase tracking-widest text-primary">Day {dayNum} of 30</div>
         <h1 className="mt-2 text-3xl font-bold sm:text-4xl">{topic}</h1>
@@ -123,6 +149,7 @@ function Daily() {
           </div>
         )}
       </section>
+      )}
       <Footer />
     </div>
   );

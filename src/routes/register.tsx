@@ -59,16 +59,16 @@ function Register() {
       const text = (data.text || "").replace(/\s+/g, " ");
       // Find all 4-digit years in the document
       const years = (text.match(/\b(19|20)\d{2}\b/g) || []).map(Number);
-      const VALID_YEARS = [2026, 2027];
+      const VALID_YEARS = [2024, 2025, 2026, 2027];
       const hasValid = years.some(y => VALID_YEARS.includes(y) || y > 2027);
-      const hasOld = years.some(y => y <= 2025);
+      const hasOld = years.some(y => y <= 2023);
       if (years.length === 0) {
-        setIdError("ID card par koi valid year (2026 ya 2027) nahi mila. Kripya saaf aur naya ID card upload karein.");
+        setIdError("ID card par koi valid year (2024–2027) nahi mila. Kripya saaf ID card upload karein.");
       } else if (!hasValid && hasOld) {
         const maxYr = Math.max(...years);
-        setIdError(`Ye ID card invalid hai ❌ — ispe purana year (${maxYr}) likha hai. Sirf 2026 / 2027 wala valid ID card hi accept hoga. Fraud se bachne ke liye apna current ID card upload karein.`);
+        setIdError(`Ye ID card invalid hai ❌ — ispe purana year (${maxYr}) likha hai. Sirf 2024 / 2025 / 2026 / 2027 wala valid ID card hi accept hoga.`);
       } else if (!hasValid) {
-        setIdError("Is ID card par valid year (2026 / 2027) detect nahi ho paya. Kripya naya ID card upload karein.");
+        setIdError("Is ID card par valid year (2024 / 2025 / 2026 / 2027) detect nahi ho paya. Kripya naya ID card upload karein.");
       } else {
         setIdCard({ name: file.name, dataUrl });
         setIdVerified(true);

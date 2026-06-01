@@ -160,7 +160,7 @@ function Register() {
                 <p className="mt-1.5 text-xs font-medium text-secondary">✅ ID card verified — valid year detected.</p>
               )}
               {idError && <p className="mt-1.5 text-xs font-medium text-destructive">{idError}</p>}
-              <p className="mt-1.5 text-[11px] text-muted-foreground">Sirf 2026 ya 2027 valid ID card accept honge. Purane (2025 ya pehle) ID card invalid maane jayenge. JPG / PNG / WEBP, max 5MB.</p>
+              <p className="mt-1.5 text-[11px] text-muted-foreground">2024, 2025, 2026 ya 2027 wala ID card accept hoga. 2023 ya usse purana invalid maana jayega. JPG / PNG / WEBP, max 5MB.</p>
             </Field>
             <button disabled={loading} className="mt-2 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-gradient-hero text-sm font-semibold text-primary-foreground shadow-soft transition hover:scale-[1.01] disabled:opacity-60">
               <BadgeCheck className="h-4 w-4"/> {loading ? "Creating account..." : "Register FREE & Start Challenge"}

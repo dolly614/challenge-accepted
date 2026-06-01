@@ -59,16 +59,16 @@ function Register() {
       const text = (data.text || "").replace(/\s+/g, " ");
       // Find all 4-digit years in the document
       const years = (text.match(/\b(19|20)\d{2}\b/g) || []).map(Number);
-      const VALID_YEARS = [2026, 2027];
+      const VALID_YEARS = [2024, 2025, 2026, 2027];
       const hasValid = years.some(y => VALID_YEARS.includes(y) || y > 2027);
-      const hasOld = years.some(y => y <= 2025);
+      const hasOld = years.some(y => y <= 2023);
       if (years.length === 0) {
-        setIdError("ID card par koi valid year (2026 ya 2027) nahi mila. Kripya saaf aur naya ID card upload karein.");
+        setIdError("ID card par koi valid year (2024–2027) nahi mila. Kripya saaf ID card upload karein.");
       } else if (!hasValid && hasOld) {
         const maxYr = Math.max(...years);
-        setIdError(`Ye ID card invalid hai ❌ — ispe purana year (${maxYr}) likha hai. Sirf 2026 / 2027 wala valid ID card hi accept hoga. Fraud se bachne ke liye apna current ID card upload karein.`);
+        setIdError(`Ye ID card invalid hai ❌ — ispe purana year (${maxYr}) likha hai. Sirf 2024 / 2025 / 2026 / 2027 wala valid ID card hi accept hoga.`);
       } else if (!hasValid) {
-        setIdError("Is ID card par valid year (2026 / 2027) detect nahi ho paya. Kripya naya ID card upload karein.");
+        setIdError("Is ID card par valid year (2024 / 2025 / 2026 / 2027) detect nahi ho paya. Kripya naya ID card upload karein.");
       } else {
         setIdCard({ name: file.name, dataUrl });
         setIdVerified(true);
@@ -160,7 +160,7 @@ function Register() {
                 <p className="mt-1.5 text-xs font-medium text-secondary">✅ ID card verified — valid year detected.</p>
               )}
               {idError && <p className="mt-1.5 text-xs font-medium text-destructive">{idError}</p>}
-              <p className="mt-1.5 text-[11px] text-muted-foreground">Sirf 2026 ya 2027 valid ID card accept honge. Purane (2025 ya pehle) ID card invalid maane jayenge. JPG / PNG / WEBP, max 5MB.</p>
+              <p className="mt-1.5 text-[11px] text-muted-foreground">2024, 2025, 2026 ya 2027 wala ID card accept hoga. 2023 ya usse purana invalid maana jayega. JPG / PNG / WEBP, max 5MB.</p>
             </Field>
             <button disabled={loading} className="mt-2 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-gradient-hero text-sm font-semibold text-primary-foreground shadow-soft transition hover:scale-[1.01] disabled:opacity-60">
               <BadgeCheck className="h-4 w-4"/> {loading ? "Creating account..." : "Register FREE & Start Challenge"}

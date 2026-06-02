@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TeacherRouteImport } from './routes/teacher'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as RegisterRouteImport } from './routes/register'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as ExamRouteImport } from './routes/exam'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -23,9 +25,19 @@ const TeacherRoute = TeacherRouteImport.update({
   path: '/teacher',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LeaderboardRoute = LeaderboardRouteImport.update({
@@ -65,7 +77,9 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/exam': typeof ExamRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/signup': typeof SignupRoute
   '/teacher': typeof TeacherRoute
   '/daily/$day': typeof DailyDayRoute
 }
@@ -75,7 +89,9 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/exam': typeof ExamRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/signup': typeof SignupRoute
   '/teacher': typeof TeacherRoute
   '/daily/$day': typeof DailyDayRoute
 }
@@ -86,7 +102,9 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/exam': typeof ExamRoute
   '/leaderboard': typeof LeaderboardRoute
+  '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/signup': typeof SignupRoute
   '/teacher': typeof TeacherRoute
   '/daily/$day': typeof DailyDayRoute
 }
@@ -98,7 +116,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/exam'
     | '/leaderboard'
+    | '/login'
     | '/register'
+    | '/signup'
     | '/teacher'
     | '/daily/$day'
   fileRoutesByTo: FileRoutesByTo
@@ -108,7 +128,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/exam'
     | '/leaderboard'
+    | '/login'
     | '/register'
+    | '/signup'
     | '/teacher'
     | '/daily/$day'
   id:
@@ -118,7 +140,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/exam'
     | '/leaderboard'
+    | '/login'
     | '/register'
+    | '/signup'
     | '/teacher'
     | '/daily/$day'
   fileRoutesById: FileRoutesById
@@ -129,7 +153,9 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   ExamRoute: typeof ExamRoute
   LeaderboardRoute: typeof LeaderboardRoute
+  LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
+  SignupRoute: typeof SignupRoute
   TeacherRoute: typeof TeacherRoute
   DailyDayRoute: typeof DailyDayRoute
 }
@@ -143,11 +169,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TeacherRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/register': {
       id: '/register'
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/leaderboard': {
@@ -201,20 +241,12 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   ExamRoute: ExamRoute,
   LeaderboardRoute: LeaderboardRoute,
+  LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
+  SignupRoute: SignupRoute,
   TeacherRoute: TeacherRoute,
   DailyDayRoute: DailyDayRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

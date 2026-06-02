@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TeacherRouteImport } from './routes/teacher'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
@@ -22,6 +23,11 @@ import { Route as DailyDayRouteImport } from './routes/daily.$day'
 const TeacherRoute = TeacherRouteImport.update({
   id: '/teacher',
   path: '/teacher',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RegisterRoute = RegisterRouteImport.update({
@@ -73,6 +79,7 @@ export interface FileRoutesByFullPath {
   '/leaderboard': typeof LeaderboardRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/signup': typeof SignupRoute
   '/teacher': typeof TeacherRoute
   '/daily/$day': typeof DailyDayRoute
 }
@@ -84,6 +91,7 @@ export interface FileRoutesByTo {
   '/leaderboard': typeof LeaderboardRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/signup': typeof SignupRoute
   '/teacher': typeof TeacherRoute
   '/daily/$day': typeof DailyDayRoute
 }
@@ -96,6 +104,7 @@ export interface FileRoutesById {
   '/leaderboard': typeof LeaderboardRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/signup': typeof SignupRoute
   '/teacher': typeof TeacherRoute
   '/daily/$day': typeof DailyDayRoute
 }
@@ -109,6 +118,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/login'
     | '/register'
+    | '/signup'
     | '/teacher'
     | '/daily/$day'
   fileRoutesByTo: FileRoutesByTo
@@ -120,6 +130,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/login'
     | '/register'
+    | '/signup'
     | '/teacher'
     | '/daily/$day'
   id:
@@ -131,6 +142,7 @@ export interface FileRouteTypes {
     | '/leaderboard'
     | '/login'
     | '/register'
+    | '/signup'
     | '/teacher'
     | '/daily/$day'
   fileRoutesById: FileRoutesById
@@ -143,6 +155,7 @@ export interface RootRouteChildren {
   LeaderboardRoute: typeof LeaderboardRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
+  SignupRoute: typeof SignupRoute
   TeacherRoute: typeof TeacherRoute
   DailyDayRoute: typeof DailyDayRoute
 }
@@ -154,6 +167,13 @@ declare module '@tanstack/react-router' {
       path: '/teacher'
       fullPath: '/teacher'
       preLoaderRoute: typeof TeacherRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/register': {
@@ -223,6 +243,7 @@ const rootRouteChildren: RootRouteChildren = {
   LeaderboardRoute: LeaderboardRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
+  SignupRoute: SignupRoute,
   TeacherRoute: TeacherRoute,
   DailyDayRoute: DailyDayRoute,
 }

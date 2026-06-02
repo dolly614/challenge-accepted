@@ -1,7 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { BrandMark } from "./BrandMark";
+import { useAuth } from "@/hooks/use-auth";
+import { LogOut } from "lucide-react";
 
 export function Header() {
+  const { user, role, signOut } = useAuth();
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur-lg">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
@@ -14,14 +17,30 @@ export function Header() {
           <Link to="/leaderboard" className="text-muted-foreground hover:text-foreground">Leaderboard</Link>
           <Link to="/dashboard" className="text-muted-foreground hover:text-foreground">Dashboard</Link>
           <Link to="/teacher" className="text-muted-foreground hover:text-foreground">Teacher</Link>
-          <Link to="/admin" className="text-muted-foreground hover:text-foreground">Admin</Link>
+          {role === "admin" && (
+            <Link to="/admin" className="text-muted-foreground hover:text-foreground">Admin</Link>
+          )}
         </nav>
-        <Link
-          to="/register"
-          className="inline-flex h-10 items-center rounded-full bg-gradient-hero px-5 text-sm font-semibold text-primary-foreground shadow-soft transition hover:scale-[1.03]"
-        >
-          Register FREE
-        </Link>
+        {user ? (
+          <button
+            onClick={() => signOut()}
+            className="inline-flex h-10 items-center gap-2 rounded-full border border-border bg-background px-4 text-sm font-semibold hover:bg-accent"
+          >
+            <LogOut className="h-4 w-4"/> Logout
+          </button>
+        ) : (
+          <div className="flex items-center gap-2">
+            <Link to="/login" className="hidden sm:inline-flex h-10 items-center rounded-full border border-border px-4 text-sm font-semibold hover:bg-accent">
+              Login
+            </Link>
+            <Link
+              to="/signup"
+              className="inline-flex h-10 items-center rounded-full bg-gradient-hero px-5 text-sm font-semibold text-primary-foreground shadow-soft transition hover:scale-[1.03]"
+            >
+              Sign up
+            </Link>
+          </div>
+        )}
       </div>
     </header>
   );

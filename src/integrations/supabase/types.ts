@@ -14,16 +14,310 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      attempt_answers: {
+        Row: {
+          answered_at: string
+          attempt_id: string
+          id: string
+          is_correct: boolean | null
+          question_id: string
+          selected_option: number | null
+        }
+        Insert: {
+          answered_at?: string
+          attempt_id: string
+          id?: string
+          is_correct?: boolean | null
+          question_id: string
+          selected_option?: number | null
+        }
+        Update: {
+          answered_at?: string
+          attempt_id?: string
+          id?: string
+          is_correct?: boolean | null
+          question_id?: string
+          selected_option?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attempt_answers_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "exam_attempts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attempt_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_attempts: {
+        Row: {
+          correct_count: number | null
+          device_fingerprint: string | null
+          exam_id: string
+          id: string
+          question_order: string[] | null
+          score: number | null
+          skipped_count: number | null
+          started_at: string
+          status: Database["public"]["Enums"]["attempt_status"]
+          submitted_at: string | null
+          user_id: string
+          violations_count: number
+          wrong_count: number | null
+        }
+        Insert: {
+          correct_count?: number | null
+          device_fingerprint?: string | null
+          exam_id: string
+          id?: string
+          question_order?: string[] | null
+          score?: number | null
+          skipped_count?: number | null
+          started_at?: string
+          status?: Database["public"]["Enums"]["attempt_status"]
+          submitted_at?: string | null
+          user_id: string
+          violations_count?: number
+          wrong_count?: number | null
+        }
+        Update: {
+          correct_count?: number | null
+          device_fingerprint?: string | null
+          exam_id?: string
+          id?: string
+          question_order?: string[] | null
+          score?: number | null
+          skipped_count?: number | null
+          started_at?: string
+          status?: Database["public"]["Enums"]["attempt_status"]
+          submitted_at?: string | null
+          user_id?: string
+          violations_count?: number
+          wrong_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_attempts_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exams: {
+        Row: {
+          class_level: number
+          created_at: string
+          duration_minutes: number
+          exam_type: Database["public"]["Enums"]["exam_type"]
+          id: string
+          is_published: boolean
+          marks_correct: number
+          marks_wrong: number
+          scheduled_date: string
+          shift: Database["public"]["Enums"]["exam_shift"]
+          start_time: string
+          title: string
+          total_questions: number
+          updated_at: string
+        }
+        Insert: {
+          class_level: number
+          created_at?: string
+          duration_minutes?: number
+          exam_type: Database["public"]["Enums"]["exam_type"]
+          id?: string
+          is_published?: boolean
+          marks_correct?: number
+          marks_wrong?: number
+          scheduled_date: string
+          shift?: Database["public"]["Enums"]["exam_shift"]
+          start_time: string
+          title: string
+          total_questions?: number
+          updated_at?: string
+        }
+        Update: {
+          class_level?: number
+          created_at?: string
+          duration_minutes?: number
+          exam_type?: Database["public"]["Enums"]["exam_type"]
+          id?: string
+          is_published?: boolean
+          marks_correct?: number
+          marks_wrong?: number
+          scheduled_date?: string
+          shift?: Database["public"]["Enums"]["exam_shift"]
+          start_time?: string
+          title?: string
+          total_questions?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          class_level: number | null
+          created_at: string
+          full_name: string
+          id: string
+          phone: string | null
+          photo_url: string | null
+          school: string | null
+          updated_at: string
+        }
+        Insert: {
+          class_level?: number | null
+          created_at?: string
+          full_name?: string
+          id: string
+          phone?: string | null
+          photo_url?: string | null
+          school?: string | null
+          updated_at?: string
+        }
+        Update: {
+          class_level?: number | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          photo_url?: string | null
+          school?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      questions: {
+        Row: {
+          correct_option: number
+          created_at: string
+          exam_id: string
+          id: string
+          option_a: string
+          option_b: string
+          option_c: string
+          option_d: string
+          order_index: number
+          question_text: string
+        }
+        Insert: {
+          correct_option: number
+          created_at?: string
+          exam_id: string
+          id?: string
+          option_a: string
+          option_b: string
+          option_c: string
+          option_d: string
+          order_index?: number
+          question_text: string
+        }
+        Update: {
+          correct_option?: number
+          created_at?: string
+          exam_id?: string
+          id?: string
+          option_a?: string
+          option_b?: string
+          option_c?: string
+          option_d?: string
+          order_index?: number
+          question_text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "questions_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      violations_log: {
+        Row: {
+          attempt_id: string
+          created_at: string
+          details: Json | null
+          id: string
+          violation_type: string
+        }
+        Insert: {
+          attempt_id: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          violation_type: string
+        }
+        Update: {
+          attempt_id?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          violation_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "violations_log_attempt_id_fkey"
+            columns: ["attempt_id"]
+            isOneToOne: false
+            referencedRelation: "exam_attempts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "student"
+      attempt_status:
+        | "in_progress"
+        | "submitted"
+        | "auto_submitted"
+        | "disqualified"
+      exam_shift: "day" | "night"
+      exam_type: "mid" | "final"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +444,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "student"],
+      attempt_status: [
+        "in_progress",
+        "submitted",
+        "auto_submitted",
+        "disqualified",
+      ],
+      exam_shift: ["day", "night"],
+      exam_type: ["mid", "final"],
+    },
   },
 } as const

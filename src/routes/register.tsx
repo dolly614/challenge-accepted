@@ -17,11 +17,14 @@ export const Route = createFileRoute("/register")({
 function Register() {
   const nav = useNavigate();
   const { ref } = Route.useSearch();
-  const [form, setForm] = useState({ name: "", cls: "5", school: "", city: "", mobile: "", email: "", password: "" });
+  const [form, setForm] = useState({ name: "", fatherName: "", cls: "5", school: "", city: "", mobile: "", email: "", password: "" });
   const [idCard, setIdCard] = useState<{ name: string; dataUrl: string } | null>(null);
+  const [studentPhoto, setStudentPhoto] = useState<{ name: string; dataUrl: string } | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
   const [idError, setIdError] = useState<string | null>(null);
   const [idVerifying, setIdVerifying] = useState(false);
   const [idVerified, setIdVerified] = useState(false);
+  const [idOcrText, setIdOcrText] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [referrer, setReferrer] = useState<{ name: string; code: string } | null>(null);
 
@@ -37,6 +40,7 @@ function Register() {
     setIdError(null);
     setIdVerified(false);
     setIdCard(null);
+    setIdOcrText("");
     const file = e.target.files?.[0];
     if (!file) return;
     if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) {
@@ -57,27 +61,62 @@ function Register() {
     try {
       const { data } = await Tesseract.recognize(dataUrl, "eng");
       const text = (data.text || "").replace(/\s+/g, " ");
-      // Find all 4-digit years in the document
+      setIdOcrText(text);
       const years = (text.match(/\b(19|20)\d{2}\b/g) || []).map(Number);
-      const VALID_YEARS = [2024, 2025, 2026, 2027];
-      const hasValid = years.some(y => VALID_YEARS.includes(y) || y > 2027);
+      const VALID_YEARS = [2024, 2025, 2026];
+      const hasValid = years.some(y => VALID_YEARS.includes(y));
       const hasOld = years.some(y => y <= 2023);
       if (years.length === 0) {
-        setIdError("ID card par koi valid year (2024–2027) nahi mila. Kripya saaf ID card upload karein.");
-      } else if (!hasValid && hasOld) {
-        const maxYr = Math.max(...years);
-        setIdError(`Ye ID card invalid hai ❌ — ispe purana year (${maxYr}) likha hai. Sirf 2024 / 2025 / 2026 / 2027 wala valid ID card hi accept hoga.`);
-      } else if (!hasValid) {
-        setIdError("Is ID card par valid year (2024 / 2025 / 2026 / 2027) detect nahi ho paya. Kripya naya ID card upload karein.");
-      } else {
-        setIdCard({ name: file.name, dataUrl });
-        setIdVerified(true);
+        setIdError("ID card par koi valid year (2024 / 2025 / 2026) nahi mila. Kripya saaf ID card upload karein.");
+        return;
       }
+      if (!hasValid && hasOld) {
+        const maxYr = Math.max(...years);
+        setIdError(`Ye ID card invalid hai ❌ — ispe purana year (${maxYr}) likha hai. Sirf 2024 / 2025 / 2026 wala valid ID card hi accept hoga.`);
+        return;
+      }
+      if (!hasValid) {
+        setIdError("Is ID card par valid year (2024 / 2025 / 2026) detect nahi ho paya. Kripya naya ID card upload karein.");
+        return;
+      }
+      setIdCard({ name: file.name, dataUrl });
+      setIdVerified(true);
     } catch {
       setIdError("ID card verify nahi ho paya. Dobara try karein ya behtar quality ka photo upload karein.");
     } finally {
       setIdVerifying(false);
     }
+  }
+
+  async function onPhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    setPhotoError(null);
+    setStudentPhoto(null);
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) {
+      setPhotoError("Sirf PNG / JPG / WEBP image upload karein.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setPhotoError("File 5MB se kam honi chahiye.");
+      return;
+    }
+    const dataUrl: string = await new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(String(r.result));
+      r.onerror = () => rej(r.error);
+      r.readAsDataURL(file);
+    });
+    setStudentPhoto({ name: file.name, dataUrl });
+  }
+
+  function tokensMatch(value: string, ocr: string): boolean {
+    const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
+    const ocrN = norm(ocr);
+    const tokens = norm(value).split(" ").filter(t => t.length >= 3);
+    if (tokens.length === 0) return false;
+    const matched = tokens.filter(t => ocrN.includes(t)).length;
+    return matched / tokens.length >= 0.6;
   }
 
   function submit(e: React.FormEvent) {
@@ -87,12 +126,28 @@ function Register() {
       return;
     }
     if (!idVerified) {
-      setIdError("ID card verify nahi hua. Valid (2026/2027) ID card upload karein.");
+      setIdError("ID card verify nahi hua. Valid (2024 / 2025 / 2026) ID card upload karein.");
+      return;
+    }
+    if (!studentPhoto) {
+      setPhotoError("Apni ek clear photo upload karein.");
+      return;
+    }
+    const nameOk = tokensMatch(form.name, idOcrText);
+    const fatherOk = tokensMatch(form.fatherName, idOcrText);
+    const schoolOk = tokensMatch(form.school, idOcrText);
+    if (!nameOk || !fatherOk || !schoolOk) {
+      const missing = [
+        !nameOk && "Student Name",
+        !fatherOk && "Father Name",
+        !schoolOk && "School Name",
+      ].filter(Boolean).join(", ");
+      setIdError(`Form ki details ID card se match nahi ho rahi ❌ — mismatch: ${missing}. Bilkul wahi details daalein jo ID card par likhi hain.`);
       return;
     }
     setLoading(true);
     if (typeof window !== "undefined") {
-      localStorage.setItem("student", JSON.stringify({ ...form, idCard, isPaid: false, registeredAt: Date.now() }));
+      localStorage.setItem("student", JSON.stringify({ ...form, idCard, studentPhoto, isPaid: false, registeredAt: Date.now() }));
       if (ref) {
         attributeReferral({
           code: ref,
@@ -124,6 +179,7 @@ function Register() {
           )}
           <form onSubmit={submit} className="mt-8 space-y-4 rounded-3xl border border-border bg-card p-6 shadow-card">
             <Field label="Student Full Name"><input required value={form.name} onChange={upd("name")} placeholder="Aarav Sharma" className={fieldCls} /></Field>
+            <Field label="Father's Full Name"><input required value={form.fatherName} onChange={upd("fatherName")} placeholder="Rajesh Sharma" className={fieldCls} /></Field>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Class">
                 <select value={form.cls} onChange={upd("cls")} className={fieldCls}>
@@ -157,10 +213,28 @@ function Register() {
                 <img src={idCard.dataUrl} alt="ID preview" className="mt-3 h-28 w-auto rounded-lg border border-border object-cover" />
               )}
               {idVerified && !idError && (
-                <p className="mt-1.5 text-xs font-medium text-secondary">✅ ID card verified — valid year detected.</p>
+                <p className="mt-1.5 text-xs font-medium text-secondary">✅ ID card verified — valid year detected. Ab form ki details ID se match honi chahiye.</p>
               )}
               {idError && <p className="mt-1.5 text-xs font-medium text-destructive">{idError}</p>}
-              <p className="mt-1.5 text-[11px] text-muted-foreground">2024, 2025, 2026 ya 2027 wala ID card accept hoga. 2023 ya usse purana invalid maana jayega. JPG / PNG / WEBP, max 5MB.</p>
+              <p className="mt-1.5 text-[11px] text-muted-foreground">Sirf 2024 / 2025 / 2026 wala ID card accept hoga. 2023 ya usse purana invalid hai. ID card par likha Student Name, Father Name aur School Name form se match hona chahiye. JPG / PNG / WEBP, max 5MB.</p>
+            </Field>
+            <Field label="Student Photo (Clear face photo)">
+              <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-dashed border-input bg-background px-4 py-3 text-sm transition hover:border-primary">
+                <span className="flex items-center gap-2 text-muted-foreground">
+                  <IdCard className="h-4 w-4 text-primary" />
+                  {studentPhoto ? (
+                    <span className="flex items-center gap-1.5 text-foreground"><CheckCircle2 className="h-4 w-4 text-secondary" /> {studentPhoto.name}</span>
+                  ) : (
+                    <>Apni recent clear photo upload karein</>
+                  )}
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"><Upload className="h-3 w-3" /> {studentPhoto ? "Change" : "Upload"}</span>
+                <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={onPhotoUpload} />
+              </label>
+              {studentPhoto && (
+                <img src={studentPhoto.dataUrl} alt="Student preview" className="mt-3 h-28 w-28 rounded-lg border border-border object-cover" />
+              )}
+              {photoError && <p className="mt-1.5 text-xs font-medium text-destructive">{photoError}</p>}
             </Field>
             <button disabled={loading} className="mt-2 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-gradient-hero text-sm font-semibold text-primary-foreground shadow-soft transition hover:scale-[1.01] disabled:opacity-60">
               <BadgeCheck className="h-4 w-4"/> {loading ? "Creating account..." : "Register FREE & Start Challenge"}

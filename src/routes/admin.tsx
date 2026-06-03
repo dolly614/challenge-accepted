@@ -3,39 +3,50 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { useState } from "react";
 import { leaderboardSample } from "@/lib/data/challenge";
-import { Download, Lock, Users, IndianRupee, GraduationCap, Gift } from "lucide-react";
+import { Download, Lock, Users, IndianRupee, GraduationCap, Gift, FileText } from "lucide-react";
 import { ChaptersManager } from "@/components/admin/ChaptersManager";
 import { BulkImport } from "@/components/admin/BulkImport";
 import { TeachersPanel } from "@/components/admin/TeachersPanel";
 import { BrandPanel } from "@/components/admin/BrandPanel";
+import { useAuth } from "@/hooks/use-auth";
+import { Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — Uyanix 30 Days Challenge" }] }),
   component: Admin,
 });
 
-const ADMIN_PASS = "admin123";
-
 function Admin() {
-  const [auth, setAuth] = useState(false);
-  const [pwd, setPwd] = useState("");
+  const { user, role, loading } = useAuth();
   const [paid, setPaid] = useState<Record<number, boolean>>({});
 
-  if (!auth) {
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="mx-auto max-w-md px-4 py-20 text-center text-sm text-muted-foreground">Loading…</div>
+      </div>
+    );
+  }
+
+  if (!user || role !== "admin") {
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <section className="mx-auto max-w-md px-4 py-20 sm:px-6">
           <div className="rounded-3xl border border-border bg-card p-8 shadow-card">
             <Lock className="h-8 w-8 text-primary"/>
-            <h1 className="mt-3 text-2xl font-bold">Admin Login</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Demo password: <code className="rounded bg-muted px-1">admin123</code></p>
-            <input type="password" value={pwd} onChange={e => setPwd(e.target.value)} placeholder="Password"
-              className="mt-5 h-11 w-full rounded-xl border border-input bg-background px-4 text-sm outline-none focus:border-primary"/>
-            <button onClick={() => setAuth(pwd === ADMIN_PASS)}
-              className="mt-3 inline-flex h-11 w-full items-center justify-center rounded-full bg-gradient-hero text-sm font-semibold text-primary-foreground shadow-soft">
-              Login
-            </button>
+            <h1 className="mt-3 text-2xl font-bold">Admin Access Required</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {user
+                ? "Aapke account ko admin role assign nahi hai. Owner se request karein."
+                : "Please login with an admin account."}
+            </p>
+            {!user && (
+              <Link to="/login" className="mt-5 inline-flex h-11 w-full items-center justify-center rounded-full bg-gradient-hero text-sm font-semibold text-primary-foreground shadow-soft">
+                Login
+              </Link>
+            )}
           </div>
         </section>
         <Footer />
@@ -58,6 +69,13 @@ function Admin() {
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
         <h1 className="text-3xl font-bold sm:text-4xl">Admin Dashboard</h1>
         <p className="mt-1 text-sm text-muted-foreground">Manage registrations, revenue and prizes.</p>
+
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Link to="/admin/exams" className="inline-flex h-11 items-center gap-2 rounded-full bg-gradient-hero px-5 text-sm font-semibold text-primary-foreground shadow-soft">
+            <FileText className="h-4 w-4"/> Manage Exams & Questions
+          </Link>
+        </div>
+
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Stat icon={<Users className="h-5 w-5"/>} label="Total Registrations" value="12,847"/>
           <Stat icon={<IndianRupee className="h-5 w-5"/>} label="Total Revenue" value="₹12,71,853"/>

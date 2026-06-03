@@ -19,6 +19,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DailyDayRouteImport } from './routes/daily.$day'
+import { Route as AdminExamsRouteImport } from './routes/admin.exams'
 
 const TeacherRoute = TeacherRouteImport.update({
   id: '/teacher',
@@ -70,10 +71,15 @@ const DailyDayRoute = DailyDayRouteImport.update({
   path: '/daily/$day',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminExamsRoute = AdminExamsRouteImport.update({
+  id: '/exams',
+  path: '/exams',
+  getParentRoute: () => AdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/exam': typeof ExamRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -81,11 +87,12 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/signup': typeof SignupRoute
   '/teacher': typeof TeacherRoute
+  '/admin/exams': typeof AdminExamsRoute
   '/daily/$day': typeof DailyDayRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/exam': typeof ExamRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -93,12 +100,13 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/signup': typeof SignupRoute
   '/teacher': typeof TeacherRoute
+  '/admin/exams': typeof AdminExamsRoute
   '/daily/$day': typeof DailyDayRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/exam': typeof ExamRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -106,6 +114,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/signup': typeof SignupRoute
   '/teacher': typeof TeacherRoute
+  '/admin/exams': typeof AdminExamsRoute
   '/daily/$day': typeof DailyDayRoute
 }
 export interface FileRouteTypes {
@@ -120,6 +129,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/signup'
     | '/teacher'
+    | '/admin/exams'
     | '/daily/$day'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -132,6 +142,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/signup'
     | '/teacher'
+    | '/admin/exams'
     | '/daily/$day'
   id:
     | '__root__'
@@ -144,12 +155,13 @@ export interface FileRouteTypes {
     | '/register'
     | '/signup'
     | '/teacher'
+    | '/admin/exams'
     | '/daily/$day'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
+  AdminRoute: typeof AdminRouteWithChildren
   DashboardRoute: typeof DashboardRoute
   ExamRoute: typeof ExamRoute
   LeaderboardRoute: typeof LeaderboardRoute
@@ -232,12 +244,29 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DailyDayRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/exams': {
+      id: '/admin/exams'
+      path: '/exams'
+      fullPath: '/admin/exams'
+      preLoaderRoute: typeof AdminExamsRouteImport
+      parentRoute: typeof AdminRoute
+    }
   }
 }
 
+interface AdminRouteChildren {
+  AdminExamsRoute: typeof AdminExamsRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminExamsRoute: AdminExamsRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
+  AdminRoute: AdminRouteWithChildren,
   DashboardRoute: DashboardRoute,
   ExamRoute: ExamRoute,
   LeaderboardRoute: LeaderboardRoute,

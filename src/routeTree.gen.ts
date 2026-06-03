@@ -19,6 +19,8 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DailyDayRouteImport } from './routes/daily.$day'
+import { Route as AdminExamsRouteImport } from './routes/admin.exams'
+import { Route as AdminExamsExamIdRouteImport } from './routes/admin.exams.$examId'
 
 const TeacherRoute = TeacherRouteImport.update({
   id: '/teacher',
@@ -70,10 +72,20 @@ const DailyDayRoute = DailyDayRouteImport.update({
   path: '/daily/$day',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminExamsRoute = AdminExamsRouteImport.update({
+  id: '/exams',
+  path: '/exams',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminExamsExamIdRoute = AdminExamsExamIdRouteImport.update({
+  id: '/$examId',
+  path: '/$examId',
+  getParentRoute: () => AdminExamsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/exam': typeof ExamRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -81,11 +93,13 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/signup': typeof SignupRoute
   '/teacher': typeof TeacherRoute
+  '/admin/exams': typeof AdminExamsRouteWithChildren
   '/daily/$day': typeof DailyDayRoute
+  '/admin/exams/$examId': typeof AdminExamsExamIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/exam': typeof ExamRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -93,12 +107,14 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/signup': typeof SignupRoute
   '/teacher': typeof TeacherRoute
+  '/admin/exams': typeof AdminExamsRouteWithChildren
   '/daily/$day': typeof DailyDayRoute
+  '/admin/exams/$examId': typeof AdminExamsExamIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/exam': typeof ExamRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -106,7 +122,9 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/signup': typeof SignupRoute
   '/teacher': typeof TeacherRoute
+  '/admin/exams': typeof AdminExamsRouteWithChildren
   '/daily/$day': typeof DailyDayRoute
+  '/admin/exams/$examId': typeof AdminExamsExamIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -120,7 +138,9 @@ export interface FileRouteTypes {
     | '/register'
     | '/signup'
     | '/teacher'
+    | '/admin/exams'
     | '/daily/$day'
+    | '/admin/exams/$examId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -132,7 +152,9 @@ export interface FileRouteTypes {
     | '/register'
     | '/signup'
     | '/teacher'
+    | '/admin/exams'
     | '/daily/$day'
+    | '/admin/exams/$examId'
   id:
     | '__root__'
     | '/'
@@ -144,12 +166,14 @@ export interface FileRouteTypes {
     | '/register'
     | '/signup'
     | '/teacher'
+    | '/admin/exams'
     | '/daily/$day'
+    | '/admin/exams/$examId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
+  AdminRoute: typeof AdminRouteWithChildren
   DashboardRoute: typeof DashboardRoute
   ExamRoute: typeof ExamRoute
   LeaderboardRoute: typeof LeaderboardRoute
@@ -232,12 +256,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DailyDayRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/exams': {
+      id: '/admin/exams'
+      path: '/exams'
+      fullPath: '/admin/exams'
+      preLoaderRoute: typeof AdminExamsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/exams/$examId': {
+      id: '/admin/exams/$examId'
+      path: '/$examId'
+      fullPath: '/admin/exams/$examId'
+      preLoaderRoute: typeof AdminExamsExamIdRouteImport
+      parentRoute: typeof AdminExamsRoute
+    }
   }
 }
 
+interface AdminExamsRouteChildren {
+  AdminExamsExamIdRoute: typeof AdminExamsExamIdRoute
+}
+
+const AdminExamsRouteChildren: AdminExamsRouteChildren = {
+  AdminExamsExamIdRoute: AdminExamsExamIdRoute,
+}
+
+const AdminExamsRouteWithChildren = AdminExamsRoute._addFileChildren(
+  AdminExamsRouteChildren,
+)
+
+interface AdminRouteChildren {
+  AdminExamsRoute: typeof AdminExamsRouteWithChildren
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminExamsRoute: AdminExamsRouteWithChildren,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
+  AdminRoute: AdminRouteWithChildren,
   DashboardRoute: DashboardRoute,
   ExamRoute: ExamRoute,
   LeaderboardRoute: LeaderboardRoute,

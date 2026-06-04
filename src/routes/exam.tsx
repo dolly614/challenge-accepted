@@ -103,6 +103,7 @@ function Exam() {
       localStorage.removeItem(paidKey);
       try { localStorage.setItem("examScore", String(score)); } catch {}
     }
+    setPaidForCurrent(false);
     setDone(true);
   }
 

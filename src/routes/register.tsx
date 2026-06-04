@@ -196,10 +196,10 @@ function Register() {
                 <img src={idCard.dataUrl} alt="ID preview" className="mt-3 h-28 w-auto rounded-lg border border-border object-cover" />
               )}
               {idVerified && !idError && (
-                <p className="mt-1.5 text-xs font-medium text-secondary">✅ ID card verified — valid year detected. Ab form ki details ID se match honi chahiye.</p>
+                <p className="mt-1.5 text-xs font-medium text-secondary">✅ ID card verified. Ab form ki details ID se match honi chahiye.</p>
               )}
               {idError && <p className="mt-1.5 text-xs font-medium text-destructive">{idError}</p>}
-              <p className="mt-1.5 text-[11px] text-muted-foreground">Sirf 2024 / 2025 / 2026 wala ID card accept hoga. 2023 ya usse purana invalid hai. ID card par likha Student Name, Father Name aur School Name form se match hona chahiye. JPG / PNG / WEBP, max 5MB.</p>
+              <p className="mt-1.5 text-[11px] text-muted-foreground">ID card par likha Student Name, Father Name aur School Name form se match hona chahiye. JPG / PNG / WEBP, max 5MB.</p>
             </Field>
             <Field label="Student Photo (Clear face photo)">
               <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-dashed border-input bg-background px-4 py-3 text-sm transition hover:border-primary">

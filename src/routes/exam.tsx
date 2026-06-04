@@ -143,32 +143,6 @@ function Exam() {
   // type param is preserved but does not change behavior anymore
   void type;
 
-  const [answers, setAnswers] = useState<number[]>(Array(totalQs).fill(-1));
-  const [time, setTime] = useState(durationMin * 60);
-  const [done, setDone] = useState(false);
-
-  useEffect(() => {
-    if (done || !paid) return;
-    const id = setInterval(() => setTime(t => {
-      if (t <= 1) { clearInterval(id); setDone(true); return 0; }
-      return t - 1;
-    }), 1000);
-    return () => clearInterval(id);
-  }, [done, paid]);
-
-  const score = answers.reduce((s, a, i) => s + (a === QS[i].a ? 1 : 0), 0);
-  const mm = String(Math.floor(time / 60)).padStart(2, "0");
-  const ss = String(time % 60).padStart(2, "0");
-
-  function handlePay() {
-    setPaying(true);
-    setTimeout(() => {
-      if (typeof window !== "undefined") localStorage.setItem(paidKey, "1");
-      setPaid(true);
-      setPaying(false);
-    }, 900);
-  }
-
   if (!paidForCurrent && !done) {
     return (
       <div className="min-h-screen bg-background">

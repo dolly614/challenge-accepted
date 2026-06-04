@@ -109,7 +109,7 @@ function Register() {
       return;
     }
     if (!idVerified) {
-      setIdError("ID card verify nahi hua. Valid (2024 / 2025 / 2026) ID card upload karein.");
+      setIdError("ID card verify nahi hua. Kripya saaf ID card upload karein.");
       return;
     }
     if (!studentPhoto) {

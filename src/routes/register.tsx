@@ -62,23 +62,6 @@ function Register() {
       const { data } = await Tesseract.recognize(dataUrl, "eng");
       const text = (data.text || "").replace(/\s+/g, " ");
       setIdOcrText(text);
-      const years = (text.match(/\b(19|20)\d{2}\b/g) || []).map(Number);
-      const VALID_YEARS = [2024, 2025, 2026];
-      const hasValid = years.some(y => VALID_YEARS.includes(y));
-      const hasOld = years.some(y => y <= 2023);
-      if (years.length === 0) {
-        setIdError("ID card par koi valid year (2024 / 2025 / 2026) nahi mila. Kripya saaf ID card upload karein.");
-        return;
-      }
-      if (!hasValid && hasOld) {
-        const maxYr = Math.max(...years);
-        setIdError(`Ye ID card invalid hai ❌ — ispe purana year (${maxYr}) likha hai. Sirf 2024 / 2025 / 2026 wala valid ID card hi accept hoga.`);
-        return;
-      }
-      if (!hasValid) {
-        setIdError("Is ID card par valid year (2024 / 2025 / 2026) detect nahi ho paya. Kripya naya ID card upload karein.");
-        return;
-      }
       setIdCard({ name: file.name, dataUrl });
       setIdVerified(true);
     } catch {
@@ -126,7 +109,7 @@ function Register() {
       return;
     }
     if (!idVerified) {
-      setIdError("ID card verify nahi hua. Valid (2024 / 2025 / 2026) ID card upload karein.");
+      setIdError("ID card verify nahi hua. Kripya saaf ID card upload karein.");
       return;
     }
     if (!studentPhoto) {
@@ -213,10 +196,10 @@ function Register() {
                 <img src={idCard.dataUrl} alt="ID preview" className="mt-3 h-28 w-auto rounded-lg border border-border object-cover" />
               )}
               {idVerified && !idError && (
-                <p className="mt-1.5 text-xs font-medium text-secondary">✅ ID card verified — valid year detected. Ab form ki details ID se match honi chahiye.</p>
+                <p className="mt-1.5 text-xs font-medium text-secondary">✅ ID card verified. Ab form ki details ID se match honi chahiye.</p>
               )}
               {idError && <p className="mt-1.5 text-xs font-medium text-destructive">{idError}</p>}
-              <p className="mt-1.5 text-[11px] text-muted-foreground">Sirf 2024 / 2025 / 2026 wala ID card accept hoga. 2023 ya usse purana invalid hai. ID card par likha Student Name, Father Name aur School Name form se match hona chahiye. JPG / PNG / WEBP, max 5MB.</p>
+              <p className="mt-1.5 text-[11px] text-muted-foreground">ID card par likha Student Name, Father Name aur School Name form se match hona chahiye. JPG / PNG / WEBP, max 5MB.</p>
             </Field>
             <Field label="Student Photo (Clear face photo)">
               <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-dashed border-input bg-background px-4 py-3 text-sm transition hover:border-primary">

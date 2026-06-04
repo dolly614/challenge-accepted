@@ -9,7 +9,7 @@ import { BrandMark } from "@/components/site/BrandMark";
 import Tesseract from "tesseract.js";
 
 export const Route = createFileRoute("/register")({
-  validateSearch: (s: Record<string, unknown>) => ({ ref: typeof s.ref === "string" ? s.ref : undefined }),
+  validateSearch: (s: Record<string, unknown>): { ref?: string } => (typeof s.ref === "string" ? { ref: s.ref } : {}),
   head: () => ({ meta: [{ title: "Register Free — Uyanix 30 Days Challenge" }, { name: "description", content: "FREE registration. Exam fee sirf tab jab aap challenge complete karein." }] }),
   component: Register,
 });

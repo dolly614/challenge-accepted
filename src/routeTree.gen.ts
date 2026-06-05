@@ -16,6 +16,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as ExamRouteImport } from './routes/exam'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as AdminLoginRouteImport } from './routes/admin-login'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DailyDayRouteImport } from './routes/daily.$day'
@@ -57,6 +58,11 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin-login',
+  path: '/admin-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -86,6 +92,7 @@ const AdminExamsExamIdRoute = AdminExamsExamIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/admin-login': typeof AdminLoginRoute
   '/dashboard': typeof DashboardRoute
   '/exam': typeof ExamRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -100,6 +107,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/admin-login': typeof AdminLoginRoute
   '/dashboard': typeof DashboardRoute
   '/exam': typeof ExamRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -115,6 +123,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/admin-login': typeof AdminLoginRoute
   '/dashboard': typeof DashboardRoute
   '/exam': typeof ExamRoute
   '/leaderboard': typeof LeaderboardRoute
@@ -131,6 +140,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/admin-login'
     | '/dashboard'
     | '/exam'
     | '/leaderboard'
@@ -145,6 +155,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/admin-login'
     | '/dashboard'
     | '/exam'
     | '/leaderboard'
@@ -159,6 +170,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/admin-login'
     | '/dashboard'
     | '/exam'
     | '/leaderboard'
@@ -174,6 +186,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  AdminLoginRoute: typeof AdminLoginRoute
   DashboardRoute: typeof DashboardRoute
   ExamRoute: typeof ExamRoute
   LeaderboardRoute: typeof LeaderboardRoute
@@ -233,6 +246,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin-login': {
+      id: '/admin-login'
+      path: '/admin-login'
+      fullPath: '/admin-login'
+      preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -298,6 +318,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  AdminLoginRoute: AdminLoginRoute,
   DashboardRoute: DashboardRoute,
   ExamRoute: ExamRoute,
   LeaderboardRoute: LeaderboardRoute,

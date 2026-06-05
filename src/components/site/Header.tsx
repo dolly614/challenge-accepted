@@ -1,36 +1,15 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { BrandMark } from "./BrandMark";
 import { useAuth } from "@/hooks/use-auth";
 import { LogOut } from "lucide-react";
-import { useRef } from "react";
 
 export function Header() {
   const { user, role, signOut } = useAuth();
-  const navigate = useNavigate();
-  const clickCount = useRef(0);
-  const lastClick = useRef(0);
-
-  function handleLogoClick() {
-    const now = Date.now();
-    if (now - lastClick.current > 2000) clickCount.current = 0;
-    lastClick.current = now;
-    clickCount.current += 1;
-    if (clickCount.current >= 8) {
-      clickCount.current = 0;
-      navigate({ to: "/admin" });
-    }
-  }
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/60 bg-background/80 backdrop-blur-lg">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         <Link to="/" className="flex items-center gap-2 font-bold">
-          <span
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleLogoClick(); }}
-            className="cursor-pointer"
-            aria-label="Brand logo"
-          >
-            <BrandMark size={36} />
-          </span>
+          <BrandMark size={36} />
           <span className="text-base sm:text-lg leading-tight">Uyanix <span className="text-primary">30 Days</span></span>
         </Link>
         <nav className="hidden items-center gap-6 text-sm font-medium md:flex">

@@ -17,10 +17,10 @@ export const Route = createFileRoute("/admin")({
 });
 
 function Admin() {
-  const { user, role, loading } = useAuth();
+  const { user, role, loading, roleLoading } = useAuth();
   const [paid, setPaid] = useState<Record<number, boolean>>({});
 
-  if (loading) {
+  if (loading || (user && roleLoading)) {
     return (
       <div className="min-h-screen bg-background">
         <Header />

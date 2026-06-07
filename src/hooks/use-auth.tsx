@@ -11,11 +11,13 @@ type AuthCtx = {
   session: Session | null;
   role: Role;
   loading: boolean;
+  roleLoading: boolean;
   signOut: () => Promise<void>;
 };
 
 const Ctx = createContext<AuthCtx>({
   user: null, session: null, role: null, loading: true,
+  roleLoading: true,
   signOut: async () => {},
 });
 
@@ -24,6 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [role, setRole] = useState<Role>(null);
   const [loading, setLoading] = useState(true);
+  const [roleLoading, setRoleLoading] = useState(true);
   const router = useRouter();
   const qc = useQueryClient();
 
@@ -34,14 +37,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       router.invalidate();
       qc.invalidateQueries();
       if (sess?.user) {
+        setRoleLoading(true);
         // defer to avoid deadlock
         setTimeout(async () => {
           const { data } = await supabase.from("user_roles").select("role").eq("user_id", sess.user.id);
           const roles = (data ?? []).map((r) => r.role);
           setRole(roles.includes("admin") ? "admin" : roles.includes("student") ? "student" : null);
+          setRoleLoading(false);
         }, 0);
       } else {
         setRole(null);
+        setRoleLoading(false);
       }
     });
 
@@ -49,6 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(data.session);
       setUser(data.session?.user ?? null);
       setLoading(false);
+      if (!data.session?.user) setRoleLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -56,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <Ctx.Provider value={{ user, session, role, loading, signOut: async () => { await supabase.auth.signOut(); } }}>
+    <Ctx.Provider value={{ user, session, role, loading, roleLoading, signOut: async () => { await supabase.auth.signOut(); } }}>
       {children}
     </Ctx.Provider>
   );

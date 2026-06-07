@@ -14,40 +14,54 @@ export const Route = createFileRoute("/admin-login")({
 
 function AdminLoginPage() {
   const navigate = useNavigate();
-  const { user, role, loading } = useAuth();
+  const { user, role, loading, roleLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (!loading && user && role === "admin") {
+    if (!loading && !roleLoading && user && role === "admin") {
       navigate({ to: "/admin", replace: true });
     }
-  }, [user, role, loading, navigate]);
+  }, [user, role, loading, roleLoading, navigate]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     setBusy(false);
+
     if (error) {
       toast.error(error.message);
       return;
     }
-    // role check will redirect via useEffect; if not admin, show message
-    setTimeout(async () => {
-      const { data: { user: u } } = await supabase.auth.getUser();
-      if (!u) return;
-      const { data } = await supabase.from("user_roles").select("role").eq("user_id", u.id);
-      const isAdmin = (data ?? []).some((r) => r.role === "admin");
-      if (isAdmin) {
-        toast.success("Welcome admin");
-        navigate({ to: "/admin", replace: true });
-      } else {
-        toast.error("Aapke account ko admin access nahi hai");
-        await supabase.auth.signOut();
-      }
-    }, 300);
+
+    const signedInUser = data.user;
+    if (!signedInUser) {
+      toast.error("Login complete nahi hua. Dobara try karein.");
+      return;
+    }
+
+    const { data: roles, error: roleError } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", signedInUser.id);
+
+    if (roleError) {
+      toast.error("Admin access verify nahi ho pa raha. Dobara try karein.");
+      return;
+    }
+
+    const isAdmin = (roles ?? []).some((entry) => entry.role === "admin");
+
+    if (isAdmin) {
+      toast.success("Welcome admin");
+      navigate({ to: "/admin", replace: true });
+      return;
+    }
+
+    toast.error("Aapke account ko admin access nahi hai");
+    await supabase.auth.signOut();
   }
 
   return (

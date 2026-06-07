@@ -21,6 +21,23 @@ const Ctx = createContext<AuthCtx>({
   signOut: async () => {},
 });
 
+async function fetchUserRole(userId: string): Promise<Role> {
+  const { data, error } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId);
+
+  if (error) {
+    console.error("Failed to fetch user role", error);
+    return null;
+  }
+
+  const roles = (data ?? []).map((row) => row.role);
+  if (roles.includes("admin")) return "admin";
+  if (roles.includes("student")) return "student";
+  return null;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -31,34 +48,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const qc = useQueryClient();
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, sess) => {
+    let active = true;
+
+    const syncAuthState = async (sess: Session | null) => {
+      if (!active) return;
+
       setSession(sess);
       setUser(sess?.user ?? null);
-      router.invalidate();
-      qc.invalidateQueries();
-      if (sess?.user) {
-        setRoleLoading(true);
-        // defer to avoid deadlock
-        setTimeout(async () => {
-          const { data } = await supabase.from("user_roles").select("role").eq("user_id", sess.user.id);
-          const roles = (data ?? []).map((r) => r.role);
-          setRole(roles.includes("admin") ? "admin" : roles.includes("student") ? "student" : null);
-          setRoleLoading(false);
-        }, 0);
-      } else {
+
+      if (!sess?.user) {
         setRole(null);
         setRoleLoading(false);
+        return;
+      }
+
+      setRoleLoading(true);
+      const nextRole = await fetchUserRole(sess.user.id);
+
+      if (!active) return;
+
+      setRole(nextRole);
+      setRoleLoading(false);
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, sess) => {
+      void syncAuthState(sess);
+
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") {
+        router.invalidate();
+        if (event !== "SIGNED_OUT") {
+          qc.invalidateQueries();
+        }
       }
     });
 
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
-      setLoading(false);
-      if (!data.session?.user) setRoleLoading(false);
+    void supabase.auth.getSession().then(async ({ data }) => {
+      await syncAuthState(data.session);
+      if (active) {
+        setLoading(false);
+      }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

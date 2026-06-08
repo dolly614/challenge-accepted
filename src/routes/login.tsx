@@ -87,9 +87,14 @@ function LoginPage() {
             </button>
           </form>
 
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            New here? <Link to="/signup" className="font-semibold text-primary">Create an account</Link>
-          </p>
+          <div className="mt-4 flex items-center justify-between text-sm">
+            <Link to="/forgot-password" className="text-muted-foreground hover:text-primary transition">
+              Forgot password?
+            </Link>
+            <span className="text-muted-foreground">
+              New here? <Link to="/signup" className="font-semibold text-primary">Create an account</Link>
+            </span>
+          </div>
         </div>
       </section>
       <Footer />

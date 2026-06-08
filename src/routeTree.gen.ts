@@ -11,9 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TeacherRouteImport } from './routes/teacher'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as LeaderboardRouteImport } from './routes/leaderboard'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as ExamRouteImport } from './routes/exam'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AdminLoginRouteImport } from './routes/admin-login'
@@ -33,6 +35,11 @@ const SignupRoute = SignupRouteImport.update({
   path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -46,6 +53,11 @@ const LoginRoute = LoginRouteImport.update({
 const LeaderboardRoute = LeaderboardRouteImport.update({
   id: '/leaderboard',
   path: '/leaderboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExamRoute = ExamRouteImport.update({
@@ -95,9 +107,11 @@ export interface FileRoutesByFullPath {
   '/admin-login': typeof AdminLoginRoute
   '/dashboard': typeof DashboardRoute
   '/exam': typeof ExamRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/leaderboard': typeof LeaderboardRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/teacher': typeof TeacherRoute
   '/admin/exams': typeof AdminExamsRouteWithChildren
@@ -110,9 +124,11 @@ export interface FileRoutesByTo {
   '/admin-login': typeof AdminLoginRoute
   '/dashboard': typeof DashboardRoute
   '/exam': typeof ExamRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/leaderboard': typeof LeaderboardRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/teacher': typeof TeacherRoute
   '/admin/exams': typeof AdminExamsRouteWithChildren
@@ -126,9 +142,11 @@ export interface FileRoutesById {
   '/admin-login': typeof AdminLoginRoute
   '/dashboard': typeof DashboardRoute
   '/exam': typeof ExamRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/leaderboard': typeof LeaderboardRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/teacher': typeof TeacherRoute
   '/admin/exams': typeof AdminExamsRouteWithChildren
@@ -143,9 +161,11 @@ export interface FileRouteTypes {
     | '/admin-login'
     | '/dashboard'
     | '/exam'
+    | '/forgot-password'
     | '/leaderboard'
     | '/login'
     | '/register'
+    | '/reset-password'
     | '/signup'
     | '/teacher'
     | '/admin/exams'
@@ -158,9 +178,11 @@ export interface FileRouteTypes {
     | '/admin-login'
     | '/dashboard'
     | '/exam'
+    | '/forgot-password'
     | '/leaderboard'
     | '/login'
     | '/register'
+    | '/reset-password'
     | '/signup'
     | '/teacher'
     | '/admin/exams'
@@ -173,9 +195,11 @@ export interface FileRouteTypes {
     | '/admin-login'
     | '/dashboard'
     | '/exam'
+    | '/forgot-password'
     | '/leaderboard'
     | '/login'
     | '/register'
+    | '/reset-password'
     | '/signup'
     | '/teacher'
     | '/admin/exams'
@@ -189,9 +213,11 @@ export interface RootRouteChildren {
   AdminLoginRoute: typeof AdminLoginRoute
   DashboardRoute: typeof DashboardRoute
   ExamRoute: typeof ExamRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   LeaderboardRoute: typeof LeaderboardRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
   TeacherRoute: typeof TeacherRoute
   DailyDayRoute: typeof DailyDayRoute
@@ -213,6 +239,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/register': {
       id: '/register'
       path: '/register'
@@ -232,6 +265,13 @@ declare module '@tanstack/react-router' {
       path: '/leaderboard'
       fullPath: '/leaderboard'
       preLoaderRoute: typeof LeaderboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/exam': {
@@ -321,9 +361,11 @@ const rootRouteChildren: RootRouteChildren = {
   AdminLoginRoute: AdminLoginRoute,
   DashboardRoute: DashboardRoute,
   ExamRoute: ExamRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   LeaderboardRoute: LeaderboardRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
   TeacherRoute: TeacherRoute,
   DailyDayRoute: DailyDayRoute,
@@ -331,3 +373,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

@@ -29,17 +29,12 @@ export function Header() {
             <LogOut className="h-4 w-4"/> Logout
           </button>
         ) : (
-          <div className="flex items-center gap-2">
-            <Link to="/login" className="hidden sm:inline-flex h-10 items-center rounded-full border border-border px-4 text-sm font-semibold hover:bg-accent">
-              Login
-            </Link>
-            <Link
-              to="/signup"
-              className="inline-flex h-10 items-center rounded-full bg-gradient-hero px-5 text-sm font-semibold text-primary-foreground shadow-soft transition hover:scale-[1.03]"
-            >
-              Sign up
-            </Link>
-          </div>
+          <Link
+            to="/register"
+            className="inline-flex h-10 items-center rounded-full bg-gradient-hero px-5 text-sm font-semibold text-primary-foreground shadow-soft transition hover:scale-[1.03]"
+          >
+            Register
+          </Link>
         )}
       </div>
     </header>

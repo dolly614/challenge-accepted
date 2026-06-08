@@ -1,8 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { Mail, Phone } from "lucide-react";
 import { BrandMark } from "./BrandMark";
+import { useAuth } from "@/hooks/use-auth";
 
 export function Footer() {
+  const { user } = useAuth();
   return (
     <footer className="border-t border-border bg-muted/40">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-4">

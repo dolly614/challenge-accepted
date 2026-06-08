@@ -1,8 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { Mail, Phone } from "lucide-react";
 import { BrandMark } from "./BrandMark";
+import { useAuth } from "@/hooks/use-auth";
 
 export function Footer() {
+  const { user } = useAuth();
   return (
     <footer className="border-t border-border bg-muted/40">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-4">
@@ -19,10 +21,10 @@ export function Footer() {
           <h4 className="mb-3 text-sm font-semibold">Quick Links</h4>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><Link to="/" className="hover:text-foreground">Home</Link></li>
-            <li><Link to="/register" className="hover:text-foreground">Register</Link></li>
+            {!user && <li><Link to="/register" className="hover:text-foreground">Register</Link></li>}
             <li><Link to="/leaderboard" className="hover:text-foreground">Leaderboard</Link></li>
-            <li><Link to="/dashboard" className="hover:text-foreground">Dashboard</Link></li>
-            <li><Link to="/teacher" className="hover:text-foreground">Teacher Portal</Link></li>
+            {user && <li><Link to="/dashboard" className="hover:text-foreground">Dashboard</Link></li>}
+            {user && <li><Link to="/teacher" className="hover:text-foreground">Teacher Portal</Link></li>}
           </ul>
         </div>
         <div>

@@ -5,11 +5,16 @@ import { useEffect, useState } from "react";
 import { getTopicsForClass, leaderboardSample, TOTAL_DAYS } from "@/lib/data/challenge";
 import { Flame, Lock, Trophy, Award, Share2, CheckCircle2 } from "lucide-react";
 import { generateCertificate } from "@/lib/certificate";
+import { RequireAuth } from "@/components/auth/RequireAuth";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Uyanix 30 Days Challenge" }] }),
-  component: Dashboard,
+  component: DashboardGuarded,
 });
+
+function DashboardGuarded() {
+  return <RequireAuth><Dashboard /></RequireAuth>;
+}
 
 type Student = { name: string; cls: string };
 

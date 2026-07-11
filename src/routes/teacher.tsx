@@ -11,14 +11,19 @@ import {
   Award, BadgeCheck, Banknote, Copy, GraduationCap, IndianRupee, LogOut, QrCode, Share2, ShieldAlert,
   Sparkles, TrendingUp, UserCheck, Users, Wallet,
 } from "lucide-react";
+import { RequireAuth } from "@/components/auth/RequireAuth";
 
 export const Route = createFileRoute("/teacher")({
   head: () => ({ meta: [
     { title: "Teacher Portal — Uyanix 30 Days Challenge" },
     { name: "description", content: "Earn ₹10–₹20 per verified student you refer to the Uyanix 30 Days Challenge." },
   ]}),
-  component: TeacherPortal,
+  component: TeacherPortalGuarded,
 });
+
+function TeacherPortalGuarded() {
+  return <RequireAuth><TeacherPortal /></RequireAuth>;
+}
 
 function TeacherPortal() {
   const [teacher, setTeacher] = useState<Teacher | undefined>();

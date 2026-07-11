@@ -6,11 +6,16 @@ import { getTopicsForClass } from "@/lib/data/challenge";
 import { getChapter } from "@/lib/chapters";
 import { CheckCircle2, ArrowRight, Sparkles } from "lucide-react";
 import { Lock } from "lucide-react";
+import { RequireAuth } from "@/components/auth/RequireAuth";
 
 export const Route = createFileRoute("/daily/$day")({
   head: () => ({ meta: [{ title: "Aaj ka task — Uyanix 30 Days Challenge" }] }),
-  component: Daily,
+  component: DailyGuarded,
 });
+
+function DailyGuarded() {
+  return <RequireAuth><Daily /></RequireAuth>;
+}
 
 const sampleQuestions = [
   { q: "Bharat ka rashtriya pakshi kaun hai?", opts: ["Mor", "Kabootar", "Kauwa", "Tota"], a: 0 },

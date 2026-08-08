@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { ShieldCheck, Lock, BadgeCheck, IdCard, Upload, CheckCircle2 } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import { attributeReferral, getTeacherByCode } from "@/lib/teachers";
+import { supabase } from "@/integrations/supabase/client";
 import { BrandMark } from "@/components/site/BrandMark";
 import Tesseract from "tesseract.js";
 
@@ -30,8 +31,7 @@ function Register() {
 
   useEffect(() => {
     if (!ref) return;
-    const t = getTeacherByCode(ref);
-    if (t) setReferrer({ name: t.name, code: t.code });
+    void getTeacherByCode(ref).then(t => { if (t) setReferrer({ name: t.name, code: t.code }); });
   }, [ref]);
 
   const upd = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm(s => ({ ...s, [k]: e.target.value }));
@@ -102,8 +102,19 @@ function Register() {
     return matched / tokens.length >= 0.6;
   }
 
-  function submit(e: React.FormEvent) {
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  async function uploadDoc(userId: string, kind: "id-card" | "photo", dataUrl: string, fileName: string) {
+    const blob = await (await fetch(dataUrl)).blob();
+    const ext = (fileName.split(".").pop() || "jpg").toLowerCase();
+    await supabase.storage
+      .from("student-documents")
+      .upload(`${userId}/${kind}.${ext}`, blob, { upsert: true, contentType: blob.type });
+  }
+
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
+    setSubmitError(null);
     if (!idCard) {
       setIdError("Verification ke liye ID card ka photo upload karein.");
       return;
@@ -129,17 +140,50 @@ function Register() {
       return;
     }
     setLoading(true);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("student", JSON.stringify({ ...form, idCard, studentPhoto, isPaid: false, registeredAt: Date.now() }));
+    try {
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email: form.email,
+        password: form.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+          data: { full_name: form.name, class_level: form.cls },
+        },
+      });
+      if (signUpError) throw signUpError;
+
+      const userId = signUpData.user?.id;
+      if (userId && signUpData.session) {
+        await uploadDoc(userId, "id-card", idCard.dataUrl, idCard.name);
+        await uploadDoc(userId, "photo", studentPhoto.dataUrl, studentPhoto.name);
+        await supabase.from("profiles").update({
+          full_name: form.name,
+          class_level: Number(form.cls),
+          school: form.school,
+          phone: form.mobile,
+        }).eq("id", userId);
+      }
+
       if (ref) {
-        attributeReferral({
+        await attributeReferral({
           code: ref,
           studentName: form.name, studentEmail: form.email,
           studentPhone: form.mobile, studentClass: form.cls, amount: 0,
         });
       }
+
+      // Only non-sensitive display data is cached locally — never password or documents.
+      if (typeof window !== "undefined") {
+        localStorage.setItem("student", JSON.stringify({
+          name: form.name, cls: form.cls, school: form.school, city: form.city,
+          isPaid: false, registeredAt: Date.now(),
+        }));
+      }
+      nav({ to: "/dashboard" });
+    } catch (err: any) {
+      setSubmitError(err?.message || "Registration fail ho gaya. Dobara try karein.");
+    } finally {
+      setLoading(false);
     }
-    setTimeout(() => nav({ to: "/dashboard" }), 900);
   }
 
   return (
@@ -222,6 +266,7 @@ function Register() {
             <button disabled={loading} className="mt-2 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-gradient-hero text-sm font-semibold text-primary-foreground shadow-soft transition hover:scale-[1.01] disabled:opacity-60">
               <BadgeCheck className="h-4 w-4"/> {loading ? "Creating account..." : "Register FREE & Start Challenge"}
             </button>
+            {submitError && <p className="text-center text-xs font-medium text-destructive">{submitError}</p>}
             <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
               <Lock className="h-3 w-3"/> Koi payment nahi. Exam time pe pay karein.
             </div>

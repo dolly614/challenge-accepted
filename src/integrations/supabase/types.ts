@@ -243,6 +243,244 @@ export type Database = {
           },
         ]
       }
+      teacher_commissions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          reason: string | null
+          referral_id: string | null
+          status: Database["public"]["Enums"]["commission_status"]
+          teacher_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          reason?: string | null
+          referral_id?: string | null
+          status?: Database["public"]["Enums"]["commission_status"]
+          teacher_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          reason?: string | null
+          referral_id?: string | null
+          status?: Database["public"]["Enums"]["commission_status"]
+          teacher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_commissions_referral_id_fkey"
+            columns: ["referral_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_referrals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_commissions_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teacher_fraud_logs: {
+        Row: {
+          created_at: string
+          detail: string
+          id: string
+          kind: string
+          referral_id: string | null
+          teacher_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          detail?: string
+          id?: string
+          kind: string
+          referral_id?: string | null
+          teacher_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          detail?: string
+          id?: string
+          kind?: string
+          referral_id?: string | null
+          teacher_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_fraud_logs_referral_id_fkey"
+            columns: ["referral_id"]
+            isOneToOne: false
+            referencedRelation: "teacher_referrals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teacher_fraud_logs_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teacher_referrals: {
+        Row: {
+          amount: number
+          created_at: string
+          device: string | null
+          fraud_flags: string[]
+          id: string
+          paid: boolean
+          refunded: boolean
+          student_class: string
+          student_email: string
+          student_name: string
+          student_phone: string
+          teacher_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          device?: string | null
+          fraud_flags?: string[]
+          id?: string
+          paid?: boolean
+          refunded?: boolean
+          student_class?: string
+          student_email?: string
+          student_name?: string
+          student_phone?: string
+          teacher_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          device?: string | null
+          fraud_flags?: string[]
+          id?: string
+          paid?: boolean
+          refunded?: boolean
+          student_class?: string
+          student_email?: string
+          student_name?: string
+          student_phone?: string
+          teacher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_referrals_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teacher_withdrawals: {
+        Row: {
+          amount: number
+          created_at: string
+          destination: string
+          id: string
+          method: string
+          note: string | null
+          status: Database["public"]["Enums"]["withdrawal_status"]
+          teacher_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          destination: string
+          id?: string
+          method: string
+          note?: string | null
+          status?: Database["public"]["Enums"]["withdrawal_status"]
+          teacher_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          destination?: string
+          id?: string
+          method?: string
+          note?: string | null
+          status?: Database["public"]["Enums"]["withdrawal_status"]
+          teacher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teacher_withdrawals_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teachers: {
+        Row: {
+          bank_acc: string | null
+          bank_holder: string | null
+          bank_ifsc: string | null
+          code: string
+          created_at: string
+          email: string
+          fraud_score: number
+          id: string
+          kyc_number: string | null
+          kyc_type: string | null
+          name: string
+          phone: string
+          status: Database["public"]["Enums"]["teacher_status"]
+          updated_at: string
+          upi: string | null
+          user_id: string
+        }
+        Insert: {
+          bank_acc?: string | null
+          bank_holder?: string | null
+          bank_ifsc?: string | null
+          code: string
+          created_at?: string
+          email?: string
+          fraud_score?: number
+          id?: string
+          kyc_number?: string | null
+          kyc_type?: string | null
+          name?: string
+          phone?: string
+          status?: Database["public"]["Enums"]["teacher_status"]
+          updated_at?: string
+          upi?: string | null
+          user_id: string
+        }
+        Update: {
+          bank_acc?: string | null
+          bank_holder?: string | null
+          bank_ifsc?: string | null
+          code?: string
+          created_at?: string
+          email?: string
+          fraud_score?: number
+          id?: string
+          kyc_number?: string | null
+          kyc_type?: string | null
+          name?: string
+          phone?: string
+          status?: Database["public"]["Enums"]["teacher_status"]
+          updated_at?: string
+          upi?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -301,12 +539,39 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      attribute_referral: {
+        Args: {
+          _amount: number
+          _code: string
+          _device: string
+          _student_class: string
+          _student_email: string
+          _student_name: string
+          _student_phone: string
+        }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      teacher_balance: {
+        Args: { _teacher_id: string }
+        Returns: {
+          available: number
+          earned: number
+          withdrawn: number
+        }[]
+      }
+      teacher_by_code: {
+        Args: { _code: string }
+        Returns: {
+          code: string
+          name: string
+        }[]
       }
     }
     Enums: {
@@ -316,8 +581,11 @@ export type Database = {
         | "submitted"
         | "auto_submitted"
         | "disqualified"
+      commission_status: "pending" | "approved" | "cancelled" | "paid"
       exam_shift: "day" | "night"
       exam_type: "mid" | "final"
+      teacher_status: "pending" | "approved" | "rejected" | "suspended"
+      withdrawal_status: "requested" | "approved" | "paid" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -452,8 +720,11 @@ export const Constants = {
         "auto_submitted",
         "disqualified",
       ],
+      commission_status: ["pending", "approved", "cancelled", "paid"],
       exam_shift: ["day", "night"],
       exam_type: ["mid", "final"],
+      teacher_status: ["pending", "approved", "rejected", "suspended"],
+      withdrawal_status: ["requested", "approved", "paid", "rejected"],
     },
   },
 } as const

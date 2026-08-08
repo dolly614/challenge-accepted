@@ -130,7 +130,7 @@ function HowItWorks() {
   const steps = [
     { i: <ClipboardList className="h-6 w-6"/>, t: "Register", d: "Account banao bilkul FREE — koi payment nahi." },
     { i: <Sparkles className="h-6 w-6"/>, t: "30 Days Learning", d: "Roz ek naya topic + 5 MCQs." },
-    { i: <GraduationCap className="h-6 w-6"/>, t: "Final Exam", d: "30 questions, 45 minutes." },
+    { i: <GraduationCap className="h-6 w-6"/>, t: "Final Exam", d: "150 questions, 45 minutes." },
     { i: <Trophy className="h-6 w-6"/>, t: "Win Prizes", d: "Laptop, Tablet, Phone + certificate." },
   ];
   return (

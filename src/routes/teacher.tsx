@@ -1,12 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import QRCode from "qrcode";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import {
-  Teacher, balance, getCurrentTeacher, listCommissions, listReferrals, listWithdrawals,
-  loginTeacher, logoutTeacher, MIN_WITHDRAW, rankFor, registerTeacher, requestWithdrawal, seedDemoIfEmpty,
+  type Balance, type Commission, type Referral, type Teacher, type Withdrawal,
+  balance, getCurrentTeacher, listCommissions, listReferrals, listWithdrawals,
+  MIN_WITHDRAW, rankFrom, registerTeacher, requestWithdrawal,
 } from "@/lib/teachers";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Award, BadgeCheck, Banknote, Copy, GraduationCap, IndianRupee, LogOut, QrCode, Share2, ShieldAlert,
   Sparkles, TrendingUp, UserCheck, Users, Wallet,
@@ -27,13 +29,10 @@ function TeacherPortalGuarded() {
 
 function TeacherPortal() {
   const [teacher, setTeacher] = useState<Teacher | undefined>();
-  const [mode, setMode] = useState<"login" | "register">("login");
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    seedDemoIfEmpty();
-    setTeacher(getCurrentTeacher());
-    setHydrated(true);
+    void getCurrentTeacher().then(t => { setTeacher(t); setHydrated(true); });
   }, []);
 
   if (!hydrated) {
@@ -44,16 +43,16 @@ function TeacherPortal() {
     <div className="min-h-screen bg-background">
       <Header />
       {teacher
-        ? <Dashboard teacher={teacher} onLogout={() => { logoutTeacher(); setTeacher(undefined); }} />
-        : <AuthCard mode={mode} setMode={setMode} onAuth={(t) => setTeacher(t)} />}
+        ? <Dashboard teacher={teacher} onLogout={() => { void supabase.auth.signOut(); }} />
+        : <AuthCard onAuth={(t) => setTeacher(t)} />}
       <Footer />
     </div>
   );
 }
 
-/* --------------------------- AUTH --------------------------- */
+/* --------------------------- ONBOARDING --------------------------- */
 
-function AuthCard({ mode, setMode, onAuth }: { mode: "login" | "register"; setMode: (m: "login" | "register") => void; onAuth: (t: Teacher) => void }) {
+function AuthCard({ onAuth }: { onAuth: (t: Teacher) => void }) {
   return (
     <section className="relative mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-5">
       <div className="md:col-span-2 space-y-4">
@@ -72,10 +71,9 @@ function AuthCard({ mode, setMode, onAuth }: { mode: "login" | "register"; setMo
       <div className="md:col-span-3">
         <div className="rounded-3xl border border-border bg-card/70 p-6 shadow-card backdrop-blur">
           <div className="mb-5 inline-flex rounded-full border border-border bg-background p-1 text-xs font-semibold">
-            <button onClick={() => setMode("login")} className={`rounded-full px-4 py-1.5 ${mode === "login" ? "bg-gradient-hero text-primary-foreground" : "text-muted-foreground"}`}>Login</button>
-            <button onClick={() => setMode("register")} className={`rounded-full px-4 py-1.5 ${mode === "register" ? "bg-gradient-hero text-primary-foreground" : "text-muted-foreground"}`}>Register</button>
+            <span className="rounded-full bg-gradient-hero px-4 py-1.5 text-primary-foreground">Teacher Profile</span>
           </div>
-          {mode === "login" ? <LoginForm onAuth={onAuth} /> : <RegisterForm onAuth={onAuth} />}
+          <RegisterForm onAuth={onAuth} />
         </div>
       </div>
     </section>
@@ -84,57 +82,28 @@ function AuthCard({ mode, setMode, onAuth }: { mode: "login" | "register"; setMo
 
 const fieldCls = "h-11 w-full rounded-xl border border-input bg-background px-4 text-sm outline-none ring-ring/30 transition focus:border-primary focus:ring-2";
 
-function LoginForm({ onAuth }: { onAuth: (t: Teacher) => void }) {
-  const [email, setEmail] = useState("priya@demo.in");
-  const [password, setPassword] = useState("demo1234");
-  const [err, setErr] = useState("");
-  function submit(e: React.FormEvent) {
-    e.preventDefault();
-    try { onAuth(loginTeacher(email, password)); } catch (e: any) { setErr(e.message); }
-  }
-  return (
-    <form onSubmit={submit} className="space-y-4">
-      <Field label="Email"><input className={fieldCls} type="email" value={email} onChange={e => setEmail(e.target.value)} required/></Field>
-      <Field label="Password"><input className={fieldCls} type="password" value={password} onChange={e => setPassword(e.target.value)} required/></Field>
-      {err && <p className="text-xs text-destructive">{err}</p>}
-      <button className="inline-flex h-11 w-full items-center justify-center rounded-full bg-gradient-hero text-sm font-semibold text-primary-foreground shadow-soft">Login as Teacher</button>
-      <p className="text-xs text-muted-foreground">Demo creds prefilled — ya naye account ke liye Register tab choose karein.</p>
-    </form>
-  );
-}
-
 function RegisterForm({ onAuth }: { onAuth: (t: Teacher) => void }) {
-  const [f, setF] = useState({ name: "", email: "", phone: "", password: "", kycType: "aadhaar", kycNumber: "", upi: "" });
-  const [otp, setOtp] = useState({ shown: false, code: "", entered: "" });
+  const [f, setF] = useState({ name: "", phone: "", kycType: "aadhaar", kycNumber: "", upi: "" });
   const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
   const upd = (k: string) => (e: any) => setF(s => ({ ...s, [k]: e.target.value }));
 
-  function sendOtp() {
-    if (!/^\d{10}$/.test(f.phone)) return setErr("Enter valid 10-digit phone");
-    const code = String(Math.floor(100000 + Math.random() * 900000));
-    setOtp({ shown: true, code, entered: "" });
-    setErr(""); alert("Demo OTP: " + code);
-  }
-
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (otp.entered !== otp.code) return setErr("Incorrect OTP");
+    setErr(""); setBusy(true);
     try {
-      const t = registerTeacher({
-        name: f.name, email: f.email, phone: f.phone, password: f.password, upi: f.upi,
-        kyc: f.kycNumber ? { type: f.kycType as any, number: f.kycNumber } : undefined,
+      const t = await registerTeacher({
+        name: f.name, phone: f.phone, upi: f.upi,
+        kycType: f.kycType, kycNumber: f.kycNumber,
       });
       onAuth(t);
-    } catch (e: any) { setErr(e.message); }
+    } catch (e: any) { setErr(e.message || "Kuch galat ho gaya. Dobara try karein."); }
+    finally { setBusy(false); }
   }
   return (
     <form onSubmit={submit} className="space-y-4">
       <Field label="Full Name"><input className={fieldCls} required value={f.name} onChange={upd("name")} placeholder="Priya Verma"/></Field>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Email"><input type="email" className={fieldCls} required value={f.email} onChange={upd("email")}/></Field>
-        <Field label="Phone (10-digit)"><input className={fieldCls} required value={f.phone} onChange={upd("phone")} pattern="[0-9]{10}"/></Field>
-      </div>
-      <Field label="Password (min 6)"><input type="password" minLength={6} className={fieldCls} required value={f.password} onChange={upd("password")}/></Field>
+      <Field label="Phone (10-digit)"><input className={fieldCls} required value={f.phone} onChange={upd("phone")} pattern="[0-9]{10}"/></Field>
       <div className="grid gap-4 sm:grid-cols-3">
         <Field label="KYC Type">
           <select className={fieldCls} value={f.kycType} onChange={upd("kycType")}>
@@ -144,13 +113,9 @@ function RegisterForm({ onAuth }: { onAuth: (t: Teacher) => void }) {
         <div className="sm:col-span-2"><Field label="KYC Number (optional)"><input className={fieldCls} value={f.kycNumber} onChange={upd("kycNumber")}/></Field></div>
       </div>
       <Field label="UPI ID (for payouts)"><input className={fieldCls} value={f.upi} onChange={upd("upi")} placeholder="name@upi"/></Field>
-
-      {!otp.shown
-        ? <button type="button" onClick={sendOtp} className="inline-flex h-11 w-full items-center justify-center rounded-full border border-border bg-background text-sm font-semibold">Send OTP</button>
-        : <Field label="Enter 6-digit OTP"><input className={fieldCls} value={otp.entered} onChange={e => setOtp(o => ({ ...o, entered: e.target.value }))} maxLength={6}/></Field>}
       {err && <p className="text-xs text-destructive">{err}</p>}
-      <button disabled={!otp.shown} className="inline-flex h-11 w-full items-center justify-center rounded-full bg-gradient-hero text-sm font-semibold text-primary-foreground shadow-soft disabled:opacity-50">Create Teacher Account</button>
-      <p className="text-xs text-muted-foreground">Approval admin team check ke baad 24h mein ho jaata hai.</p>
+      <button disabled={busy} className="inline-flex h-11 w-full items-center justify-center rounded-full bg-gradient-hero text-sm font-semibold text-primary-foreground shadow-soft disabled:opacity-50">Create Teacher Account</button>
+      <p className="text-xs text-muted-foreground">Aapke login account se hi teacher profile banta hai. Approval admin team check ke baad 24h mein ho jaata hai.</p>
     </form>
   );
 }
@@ -162,16 +127,25 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 /* --------------------------- DASHBOARD --------------------------- */
 
 function Dashboard({ teacher, onLogout }: { teacher: Teacher; onLogout: () => void }) {
-  const refs = listReferrals(teacher.id);
-  const coms = listCommissions(teacher.id);
-  const wds = listWithdrawals(teacher.id);
-  const bal = balance(teacher.id);
-  const r = rankFor(teacher.id);
+  const [refs, setRefs] = useState<Referral[]>([]);
+  const [coms, setComs] = useState<Commission[]>([]);
+  const [wds, setWds] = useState<Withdrawal[]>([]);
+  const [bal, setBal] = useState<Balance>({ earned: 0, withdrawn: 0, available: 0 });
+
+  const load = useCallback(async () => {
+    const [r, c, w, b] = await Promise.all([
+      listReferrals(teacher.id), listCommissions(teacher.id), listWithdrawals(teacher.id), balance(teacher.id),
+    ]);
+    setRefs(r); setComs(c); setWds(w); setBal(b);
+  }, [teacher.id]);
+
+  useEffect(() => { void load(); }, [load]);
 
   const link = typeof window !== "undefined" ? `${window.location.origin}/register?ref=${teacher.code}` : `/register?ref=${teacher.code}`;
   const paidCount = refs.filter(x => x.paid && !x.refunded).length;
   const pendingCount = refs.filter(x => !x.paid).length;
   const conv = refs.length ? Math.round((paidCount / refs.length) * 100) : 0;
+  const r = rankFrom(paidCount);
 
   // simple per-day chart for last 14 days
   const days = useMemo(() => {
@@ -179,7 +153,10 @@ function Dashboard({ teacher, onLogout }: { teacher: Teacher; onLogout: () => vo
     for (let i = 13; i >= 0; i--) {
       const day = new Date(); day.setDate(day.getDate() - i); day.setHours(0,0,0,0);
       const next = day.getTime() + 86400000;
-      const v = refs.filter(r => r.createdAt >= day.getTime() && r.createdAt < next).length;
+      const v = refs.filter(x => {
+        const ts = new Date(x.created_at).getTime();
+        return ts >= day.getTime() && ts < next;
+      }).length;
       arr.push({ d: day.toLocaleDateString("en-IN", { day: "2-digit", month: "short" }), v });
     }
     return arr;
@@ -221,7 +198,7 @@ function Dashboard({ teacher, onLogout }: { teacher: Teacher; onLogout: () => vo
       <div className="mt-8 grid gap-6 lg:grid-cols-3">
         <ReferralCard link={link} code={teacher.code}/>
         <RankCard rank={r.rank} next={r.next} progress={r.progress} active={paidCount}/>
-        <WithdrawCard teacher={teacher} bal={bal}/>
+        <WithdrawCard teacher={teacher} bal={bal} onDone={load}/>
       </div>
 
       {/* chart */}
@@ -251,13 +228,13 @@ function Dashboard({ teacher, onLogout }: { teacher: Teacher; onLogout: () => vo
             <table className="w-full text-sm">
               <thead className="text-left text-xs uppercase text-muted-foreground"><tr><th className="py-2">Student</th><th className="py-2">Class</th><th className="py-2">Status</th><th className="py-2 text-right">Earned</th></tr></thead>
               <tbody>
-                {refs.slice(0, 8).map(r => {
-                  const c = coms.find(c => c.referralId === r.id);
+                {refs.slice(0, 8).map(x => {
+                  const c = coms.find(c => c.referral_id === x.id);
                   return (
-                    <tr key={r.id} className="border-t border-border">
-                      <td className="py-2"><div className="font-medium">{r.studentName}</div><div className="text-xs text-muted-foreground">{r.studentEmail}</div></td>
-                      <td className="py-2">{r.studentClass}</td>
-                      <td className="py-2">{r.fraudFlags.length ? <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-xs text-destructive">flagged</span> : r.paid ? <span className="rounded-full bg-secondary/20 px-2 py-0.5 text-xs text-secondary">paid</span> : <span className="text-xs">pending</span>}</td>
+                    <tr key={x.id} className="border-t border-border">
+                      <td className="py-2"><div className="font-medium">{x.student_name}</div><div className="text-xs text-muted-foreground">{x.student_email}</div></td>
+                      <td className="py-2">{x.student_class}</td>
+                      <td className="py-2">{x.fraud_flags.length ? <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-xs text-destructive">flagged</span> : x.paid ? <span className="rounded-full bg-secondary/20 px-2 py-0.5 text-xs text-secondary">paid</span> : <span className="text-xs">pending</span>}</td>
                       <td className="py-2 text-right font-semibold">{c?.amount ? `₹${c.amount}` : "—"}</td>
                     </tr>
                   );
@@ -274,7 +251,7 @@ function Dashboard({ teacher, onLogout }: { teacher: Teacher; onLogout: () => vo
               <tbody>
                 {wds.map(w => (
                   <tr key={w.id} className="border-t border-border">
-                    <td className="py-2 text-xs">{new Date(w.createdAt).toLocaleDateString("en-IN")}</td>
+                    <td className="py-2 text-xs">{new Date(w.created_at).toLocaleDateString("en-IN")}</td>
                     <td className="py-2 uppercase text-xs">{w.method}</td>
                     <td className="py-2"><Badge tone={w.status === "paid" ? "secondary" : w.status === "rejected" ? "destructive" : "muted"}>{w.status}</Badge></td>
                     <td className="py-2 text-right font-semibold">₹{w.amount}</td>
@@ -296,10 +273,10 @@ function Dashboard({ teacher, onLogout }: { teacher: Teacher; onLogout: () => vo
   );
 }
 
-function monthEarn(coms: ReturnType<typeof listCommissions>) {
+function monthEarn(coms: Commission[]) {
   const now = new Date(); const m = now.getMonth(); const y = now.getFullYear();
-  return coms.filter(c => { const d = new Date(c.createdAt); return d.getMonth() === m && d.getFullYear() === y && c.status !== "cancelled"; })
-    .reduce((a, c) => a + c.amount, 0);
+  return coms.filter(c => { const d = new Date(c.created_at); return d.getMonth() === m && d.getFullYear() === y && c.status !== "cancelled"; })
+    .reduce((a, c) => a + Number(c.amount), 0);
 }
 
 /* ---- subcomponents ---- */
@@ -376,19 +353,19 @@ function RankCard({ rank, next, progress, active }: { rank: string; next?: strin
   );
 }
 
-function WithdrawCard({ teacher, bal }: { teacher: Teacher; bal: ReturnType<typeof balance> }) {
+function WithdrawCard({ teacher, bal, onDone }: { teacher: Teacher; bal: Balance; onDone: () => void | Promise<void> }) {
   const [amount, setAmount] = useState(MIN_WITHDRAW);
   const [method, setMethod] = useState<"upi" | "bank">("upi");
   const [destination, setDestination] = useState(teacher.upi || "");
   const [msg, setMsg] = useState<{ k: "ok" | "err"; t: string } | null>(null);
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
     try {
-      requestWithdrawal(teacher.id, Number(amount), method, destination);
+      await requestWithdrawal(teacher.id, Number(amount), method, destination);
       setMsg({ k: "ok", t: "Withdrawal requested. Admin approval ke baad 1–3 din mein process." });
-      setTimeout(() => location.reload(), 800);
-    } catch (e: any) { setMsg({ k: "err", t: e.message }); }
+      await onDone();
+    } catch (e: any) { setMsg({ k: "err", t: e.message || "Request fail ho gayi." }); }
   }
 
   return (

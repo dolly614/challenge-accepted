@@ -16,6 +16,17 @@ export function Footer() {
           <p className="mt-3 max-w-md text-sm text-muted-foreground">
             India's most exciting daily learning competition for Class 1–12 students. Seekho, Compete Karo, Jeeto!
           </p>
+          <div className="mt-4 flex items-center gap-3">
+            <a
+              href="https://www.instagram.com/dollysingh12682026/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-muted text-muted-foreground transition hover:bg-primary hover:text-primary-foreground"
+            >
+              <Instagram className="h-4 w-4" />
+            </a>
+          </div>
         </div>
         <div>
           <h4 className="mb-3 text-sm font-semibold">Quick Links</h4>

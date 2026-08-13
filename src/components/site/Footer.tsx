@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Mail, Phone } from "lucide-react";
+import { Instagram, Mail, Phone } from "lucide-react";
 import { BrandMark } from "./BrandMark";
 import { useAuth } from "@/hooks/use-auth";
 

@@ -176,7 +176,7 @@ function Register() {
       }
 
       // No student data is cached in the browser — everything lives in the RLS-protected profiles table.
-      nav({ to: "/dashboard" });
+      setStep(3);
     } catch (err: any) {
       setSubmitError(err?.message || "Registration fail ho gaya. Dobara try karein.");
     } finally {

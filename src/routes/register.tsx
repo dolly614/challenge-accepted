@@ -27,6 +27,10 @@ function Register() {
   const [idVerified, setIdVerified] = useState(false);
   const [idOcrText, setIdOcrText] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [agree, setAgree] = useState(false);
+  const [stepError, setStepError] = useState<string | null>(null);
   const [referrer, setReferrer] = useState<{ name: string; code: string } | null>(null);
 
   useEffect(() => {
@@ -172,12 +176,26 @@ function Register() {
       }
 
       // No student data is cached in the browser — everything lives in the RLS-protected profiles table.
-      nav({ to: "/dashboard" });
+      setStep(3);
     } catch (err: any) {
       setSubmitError(err?.message || "Registration fail ho gaya. Dobara try karein.");
     } finally {
       setLoading(false);
     }
+  }
+
+  function goToStep2(e: React.FormEvent) {
+    e.preventDefault();
+    setStepError(null);
+    if (form.password !== confirmPassword) {
+      setStepError("Password aur Confirm Password same hone chahiye.");
+      return;
+    }
+    if (!agree) {
+      setStepError("Terms & Conditions accept karein.");
+      return;
+    }
+    setStep(2);
   }
 
   return (
@@ -198,7 +216,15 @@ function Register() {
               <BadgeCheck className="h-4 w-4"/> Referred by <b className="text-foreground">{referrer.name}</b> · code {referrer.code}
             </div>
           )}
-          <form onSubmit={submit} className="mt-8 space-y-4 rounded-3xl border border-border bg-card p-6 shadow-card">
+
+          <Stepper step={step} />
+
+          {step === 1 && (
+          <form onSubmit={goToStep2} className="mt-8 space-y-4 rounded-3xl border border-border bg-card p-6 shadow-card">
+            <div className="text-center">
+              <h2 className="text-xl font-bold">Create Your Account</h2>
+              <p className="text-xs text-muted-foreground">30-Day Challenge ke liye register karein</p>
+            </div>
             <Field label="Student Full Name"><input required value={form.name} onChange={upd("name")} placeholder="Aarav Sharma" className={fieldCls} /></Field>
             <Field label="Father's Full Name"><input required value={form.fatherName} onChange={upd("fatherName")} placeholder="Rajesh Sharma" className={fieldCls} /></Field>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -214,8 +240,36 @@ function Register() {
               <Field label="Parent Mobile"><input required type="tel" pattern="[0-9]{10}" value={form.mobile} onChange={upd("mobile")} placeholder="9876543210" className={fieldCls}/></Field>
               <Field label="Parent Email"><input required type="email" value={form.email} onChange={upd("email")} placeholder="parent@email.com" className={fieldCls}/></Field>
             </div>
-            <Field label="Password"><input required type="password" minLength={6} value={form.password} onChange={upd("password")} placeholder="Min 6 characters" className={fieldCls}/></Field>
-            <Field label="ID Card Photo (Verification)">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label="Password"><input required type="password" minLength={6} value={form.password} onChange={upd("password")} placeholder="Min 6 characters" className={fieldCls}/></Field>
+              <Field label="Confirm Password"><input required type="password" minLength={6} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm password" className={fieldCls}/></Field>
+            </div>
+            <label className="flex items-center gap-2 text-xs text-muted-foreground">
+              <input type="checkbox" checked={agree} onChange={(e) => setAgree(e.target.checked)} className="h-4 w-4 rounded border-input accent-[hsl(var(--primary))]" />
+              I agree to the <span className="font-semibold text-primary">Terms &amp; Conditions</span>
+            </label>
+            {stepError && <p className="text-center text-xs font-medium text-destructive">{stepError}</p>}
+            <button className="mt-2 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-gradient-hero text-sm font-semibold text-primary-foreground shadow-soft transition hover:scale-[1.01]">
+              Create Account &amp; Continue →
+            </button>
+            <p className="text-center text-xs text-muted-foreground">
+              Already registered? <button type="button" onClick={() => nav({ to: "/login" })} className="font-semibold text-primary">Login</button>
+            </p>
+          </form>
+          )}
+
+          {step === 2 && (
+          <form onSubmit={submit} className="mt-8 space-y-4 rounded-3xl border border-border bg-card p-6 shadow-card">
+            <div className="text-center">
+              <h2 className="text-xl font-bold">Verify Your Student ID</h2>
+              <p className="text-xs text-muted-foreground">Apni student identity verify karein aur challenge unlock karein.</p>
+            </div>
+            <div className="flex flex-wrap justify-center gap-2 text-[11px] font-semibold text-muted-foreground">
+              {["School ID Card", "Birth Certificate", "Aadhaar Card"].map(d => (
+                <span key={d} className="rounded-full border border-border bg-accent/50 px-3 py-1">{d}</span>
+              ))}
+            </div>
+            <Field label="Student ID / Verification Document">
               <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-dashed border-input bg-background px-4 py-3 text-sm transition hover:border-primary">
                 <span className="flex items-center gap-2 text-muted-foreground">
                   <IdCard className="h-4 w-4 text-primary" />
@@ -257,14 +311,34 @@ function Register() {
               )}
               {photoError && <p className="mt-1.5 text-xs font-medium text-destructive">{photoError}</p>}
             </Field>
+            <div className="rounded-xl border border-border bg-accent/50 px-4 py-3 text-[11px] text-muted-foreground">
+              Aapki details Teacher/Admin team check karegi. Status: <b className="text-primary">Verification Pending</b>
+            </div>
             <button disabled={loading} className="mt-2 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-gradient-hero text-sm font-semibold text-primary-foreground shadow-soft transition hover:scale-[1.01] disabled:opacity-60">
-              <BadgeCheck className="h-4 w-4"/> {loading ? "Creating account..." : "Register FREE & Start Challenge"}
+              <BadgeCheck className="h-4 w-4"/> {loading ? "Submitting..." : "Submit for Verification →"}
             </button>
             {submitError && <p className="text-center text-xs font-medium text-destructive">{submitError}</p>}
+            <button type="button" onClick={() => setStep(1)} className="w-full text-center text-xs font-semibold text-muted-foreground">← Back to details</button>
             <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
               <Lock className="h-3 w-3"/> Koi payment nahi. Exam time pe pay karein.
             </div>
           </form>
+          )}
+
+          {step === 3 && (
+          <div className="mt-8 space-y-4 rounded-3xl border border-border bg-card p-8 text-center shadow-card">
+            <CheckCircle2 className="mx-auto h-14 w-14 text-secondary" />
+            <h2 className="text-xl font-bold">Verification Submitted Successfully! 🎉</h2>
+            <p className="text-sm text-muted-foreground">Aapke documents review ke liye submit ho gaye hain. Teacher/Admin review ke baad verification complete hoti hai.</p>
+            <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-border bg-accent/60 px-4 py-2 text-xs font-semibold">
+              Status: <span className="text-primary">Verification Pending</span>
+            </div>
+            <button onClick={() => nav({ to: "/dashboard" })} className="inline-flex h-12 w-full items-center justify-center rounded-full bg-gradient-hero text-sm font-semibold text-primary-foreground shadow-soft transition hover:scale-[1.01]">
+              Go to Dashboard →
+            </button>
+            <p className="text-[11px] text-muted-foreground">Verification complete hone par aapko notification mil jayega.</p>
+          </div>
+          )}
         </div>
         <aside className="md:col-span-2">
           <div className="sticky top-24 space-y-4">
@@ -302,5 +376,29 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <span className="mb-1.5 block text-xs font-semibold text-muted-foreground">{label}</span>
       {children}
     </label>
+  );
+}
+
+function Stepper({ step }: { step: 1 | 2 | 3 }) {
+  const steps = ["Register", "Verify ID", "Start Challenge"];
+  return (
+    <div className="mt-8 flex items-start justify-center gap-2">
+      {steps.map((label, i) => {
+        const n = i + 1;
+        const done = step > n;
+        const active = step === n;
+        return (
+          <div key={label} className="flex items-start">
+            <div className="flex w-24 flex-col items-center gap-1.5">
+              <div className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${done || active ? "bg-gradient-hero text-primary-foreground" : "border border-border bg-background text-muted-foreground"}`}>
+                {done ? <CheckCircle2 className="h-4 w-4" /> : n}
+              </div>
+              <span className={`text-[11px] font-semibold ${active || done ? "text-foreground" : "text-muted-foreground"}`}>{label}</span>
+            </div>
+            {n < steps.length && <div className="mt-4 h-px w-8 bg-border sm:w-16" />}
+          </div>
+        );
+      })}
+    </div>
   );
 }

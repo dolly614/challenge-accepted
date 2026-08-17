@@ -39,12 +39,12 @@ function Daily() {
   const [confetti, setConfetti] = useState(false);
 
   useEffect(() => {
-    const s = localStorage.getItem("student");
-    let c = 5;
-    if (s) try { c = parseInt(JSON.parse(s).cls) || 5; } catch {}
-    setCls(c);
-    const ch = getChapter(c, dayNum);
-    if (ch) { setCustomContent(ch.content); setCustomTitle(ch.title || null); }
+    void getStudentInfo().then(info => {
+      const c = parseInt(info.cls) || 5;
+      setCls(c);
+      const ch = getChapter(c, dayNum);
+      if (ch) { setCustomContent(ch.content); setCustomTitle(ch.title || null); }
+    });
     let done: number[] = [];
     try { done = JSON.parse(localStorage.getItem("completedDays") || "[]"); } catch {}
     setCompletedCount(done.length);

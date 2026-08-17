@@ -6,6 +6,7 @@ import { getTopicsForClass, leaderboardSample, TOTAL_DAYS } from "@/lib/data/cha
 import { Flame, Lock, Trophy, Award, Share2, CheckCircle2 } from "lucide-react";
 import { generateCertificate } from "@/lib/certificate";
 import { RequireAuth } from "@/components/auth/RequireAuth";
+import { getStudentInfo } from "@/lib/student";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Uyanix 30 Days Challenge" }] }),
@@ -24,8 +25,7 @@ function Dashboard() {
   const today = completed.length + 1;
 
   useEffect(() => {
-    const s = localStorage.getItem("student");
-    if (s) { try { const p = JSON.parse(s); setStudent({ name: p.name || "Student", cls: String(p.cls || "5") }); } catch {} }
+    void getStudentInfo().then(setStudent);
     const done = localStorage.getItem("completedDays");
     if (done) { try { setCompleted(JSON.parse(done)); } catch {} }
     else setCompleted([1,2,3,4,5,6,7,8,9,10,11,12]);

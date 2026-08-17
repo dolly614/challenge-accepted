@@ -230,6 +230,7 @@ function Register() {
             </div>
             <Field label="Student Full Name"><input required value={form.name} onChange={upd("name")} placeholder="Aarav Sharma" className={fieldCls} /></Field>
             <Field label="Father's Full Name"><input required value={form.fatherName} onChange={upd("fatherName")} placeholder="Rajesh Sharma" className={fieldCls} /></Field>
+            <Field label="ID Card / Document Number"><input required value={form.idNumber} onChange={upd("idNumber")} placeholder="School ID / Aadhaar number" className={fieldCls} /></Field>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Class">
                 <select value={form.cls} onChange={upd("cls")} className={fieldCls}>
@@ -294,7 +295,7 @@ function Register() {
                 <p className="mt-1.5 text-xs font-medium text-secondary">✅ ID card verified. Ab form ki details ID se match honi chahiye.</p>
               )}
               {idError && <p className="mt-1.5 text-xs font-medium text-destructive">{idError}</p>}
-              <p className="mt-1.5 text-[11px] text-muted-foreground">ID card par likha Student Name, Father Name aur School Name form se match hona chahiye. JPG / PNG / WEBP, max 5MB.</p>
+              <p className="mt-1.5 text-[11px] text-muted-foreground">ID card par likha Student Name, Father Name aur ID Number form se match hona chahiye, aur ID card ka photo aapki uploaded photo se milna chahiye. JPG / PNG / WEBP, max 5MB.</p>
             </Field>
             <Field label="Student Photo (Clear face photo)">
               <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-dashed border-input bg-background px-4 py-3 text-sm transition hover:border-primary">

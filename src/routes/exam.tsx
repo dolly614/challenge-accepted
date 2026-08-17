@@ -44,10 +44,7 @@ function Exam() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    try {
-      const s = localStorage.getItem("student");
-      if (s) { const p = JSON.parse(s); setStudentName(p.name || "Student"); setStudentCls(parseInt(p.cls) || 5); }
-    } catch {}
+    void getStudentInfo().then(info => { setStudentName(info.name); setStudentCls(parseInt(info.cls) || 5); });
     setToday(new Date().getDate());
   }, []);
 
@@ -177,10 +174,7 @@ function Exam() {
     if (typeof window !== "undefined") {
       try { localStorage.setItem("examScore", String(score)); } catch {}
     }
-    let student = { name: "Student", cls: "5" };
-    if (typeof window !== "undefined") {
-      try { const s = localStorage.getItem("student"); if (s) { const p = JSON.parse(s); student = { name: p.name || "Student", cls: String(p.cls || "5") }; } } catch {}
-    }
+    const student = { name: studentName, cls: String(studentCls) };
     return (
       <div className="min-h-screen bg-background">
         <Header />

@@ -27,6 +27,10 @@ function Register() {
   const [idVerified, setIdVerified] = useState(false);
   const [idOcrText, setIdOcrText] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [agree, setAgree] = useState(false);
+  const [stepError, setStepError] = useState<string | null>(null);
   const [referrer, setReferrer] = useState<{ name: string; code: string } | null>(null);
 
   useEffect(() => {

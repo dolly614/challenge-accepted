@@ -8,6 +8,8 @@ import { attributeReferral, getTeacherByCode } from "@/lib/teachers";
 import { supabase } from "@/integrations/supabase/client";
 import { BrandMark } from "@/components/site/BrandMark";
 import Tesseract from "tesseract.js";
+import { useServerFn } from "@tanstack/react-start";
+import { verifyStudentId } from "@/lib/verify-id.functions";
 
 export const Route = createFileRoute("/register")({
   validateSearch: (s: Record<string, unknown>): { ref?: string } => (typeof s.ref === "string" ? { ref: s.ref } : {}),
@@ -18,7 +20,7 @@ export const Route = createFileRoute("/register")({
 function Register() {
   const nav = useNavigate();
   const { ref } = Route.useSearch();
-  const [form, setForm] = useState({ name: "", fatherName: "", cls: "5", school: "", city: "", mobile: "", email: "", password: "" });
+  const [form, setForm] = useState({ name: "", fatherName: "", idNumber: "", cls: "5", school: "", city: "", mobile: "", email: "", password: "" });
   const [idCard, setIdCard] = useState<{ name: string; dataUrl: string } | null>(null);
   const [studentPhoto, setStudentPhoto] = useState<{ name: string; dataUrl: string } | null>(null);
   const [photoError, setPhotoError] = useState<string | null>(null);
@@ -32,6 +34,7 @@ function Register() {
   const [agree, setAgree] = useState(false);
   const [stepError, setStepError] = useState<string | null>(null);
   const [referrer, setReferrer] = useState<{ name: string; code: string } | null>(null);
+  const runVerify = useServerFn(verifyStudentId);
 
   useEffect(() => {
     if (!ref) return;
@@ -97,15 +100,6 @@ function Register() {
     setStudentPhoto({ name: file.name, dataUrl });
   }
 
-  function tokensMatch(value: string, ocr: string): boolean {
-    const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
-    const ocrN = norm(ocr);
-    const tokens = norm(value).split(" ").filter(t => t.length >= 3);
-    if (tokens.length === 0) return false;
-    const matched = tokens.filter(t => ocrN.includes(t)).length;
-    return matched / tokens.length >= 0.6;
-  }
-
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   async function uploadDoc(userId: string, kind: "id-card" | "photo", dataUrl: string, fileName: string) {
@@ -131,20 +125,29 @@ function Register() {
       setPhotoError("Apni ek clear photo upload karein.");
       return;
     }
-    const nameOk = tokensMatch(form.name, idOcrText);
-    const fatherOk = tokensMatch(form.fatherName, idOcrText);
-    const schoolOk = tokensMatch(form.school, idOcrText);
-    if (!nameOk || !fatherOk || !schoolOk) {
-      const missing = [
-        !nameOk && "Student Name",
-        !fatherOk && "Father Name",
-        !schoolOk && "School Name",
-      ].filter(Boolean).join(", ");
-      setIdError(`Form ki details ID card se match nahi ho rahi ❌ — mismatch: ${missing}. Bilkul wahi details daalein jo ID card par likhi hain.`);
-      return;
-    }
     setLoading(true);
     try {
+      const v = await runVerify({
+        data: {
+          idCard: idCard.dataUrl,
+          photo: studentPhoto.dataUrl,
+          name: form.name,
+          fatherName: form.fatherName,
+          school: form.school,
+          idNumber: form.idNumber,
+        },
+      });
+      if (!v.ok) {
+        const missing = [
+          !v.nameMatch && "Student Name",
+          !v.fatherMatch && "Father Name",
+          !v.idNumberMatch && `ID Number${v.idNumberFound ? ` (card par: ${v.idNumberFound})` : ""}`,
+          !v.photoMatch && "Photo (chehra ID card se match nahi)",
+        ].filter(Boolean).join(", ");
+        setIdError(`Verification fail ❌ — mismatch: ${missing}.${v.reason ? ` ${v.reason}` : ""}`);
+        setLoading(false);
+        return;
+      }
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,

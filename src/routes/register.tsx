@@ -378,3 +378,27 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     </label>
   );
 }
+
+function Stepper({ step }: { step: 1 | 2 | 3 }) {
+  const steps = ["Register", "Verify ID", "Start Challenge"];
+  return (
+    <div className="mt-8 flex items-start justify-center gap-2">
+      {steps.map((label, i) => {
+        const n = i + 1;
+        const done = step > n;
+        const active = step === n;
+        return (
+          <div key={label} className="flex items-start">
+            <div className="flex w-24 flex-col items-center gap-1.5">
+              <div className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold ${done || active ? "bg-gradient-hero text-primary-foreground" : "border border-border bg-background text-muted-foreground"}`}>
+                {done ? <CheckCircle2 className="h-4 w-4" /> : n}
+              </div>
+              <span className={`text-[11px] font-semibold ${active || done ? "text-foreground" : "text-muted-foreground"}`}>{label}</span>
+            </div>
+            {n < steps.length && <div className="mt-4 h-px w-8 bg-border sm:w-16" />}
+          </div>
+        );
+      })}
+    </div>
+  );
+}

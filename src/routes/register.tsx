@@ -171,13 +171,7 @@ function Register() {
         });
       }
 
-      // Only non-sensitive display data is cached locally — never password or documents.
-      if (typeof window !== "undefined") {
-        localStorage.setItem("student", JSON.stringify({
-          name: form.name, cls: form.cls, school: form.school, city: form.city,
-          isPaid: false, registeredAt: Date.now(),
-        }));
-      }
+      // No student data is cached in the browser — everything lives in the RLS-protected profiles table.
       nav({ to: "/dashboard" });
     } catch (err: any) {
       setSubmitError(err?.message || "Registration fail ho gaya. Dobara try karein.");

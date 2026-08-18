@@ -243,6 +243,66 @@ export type Database = {
           },
         ]
       }
+      students: {
+        Row: {
+          challenge_started: boolean
+          class: string
+          created_at: string
+          document_type: string | null
+          document_url: string | null
+          email: string | null
+          id: string
+          mobile_number: string
+          photo_url: string | null
+          rejection_reason: string | null
+          school_name: string
+          student_name: string
+          updated_at: string
+          user_id: string
+          verification_status: Database["public"]["Enums"]["verification_status"]
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          challenge_started?: boolean
+          class?: string
+          created_at?: string
+          document_type?: string | null
+          document_url?: string | null
+          email?: string | null
+          id?: string
+          mobile_number?: string
+          photo_url?: string | null
+          rejection_reason?: string | null
+          school_name?: string
+          student_name?: string
+          updated_at?: string
+          user_id: string
+          verification_status?: Database["public"]["Enums"]["verification_status"]
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          challenge_started?: boolean
+          class?: string
+          created_at?: string
+          document_type?: string | null
+          document_url?: string | null
+          email?: string | null
+          id?: string
+          mobile_number?: string
+          photo_url?: string | null
+          rejection_reason?: string | null
+          school_name?: string
+          student_name?: string
+          updated_at?: string
+          user_id?: string
+          verification_status?: Database["public"]["Enums"]["verification_status"]
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: []
+      }
       teacher_commissions: {
         Row: {
           amount: number
@@ -558,6 +618,66 @@ export type Database = {
         }
         Returns: boolean
       }
+      review_student_verification: {
+        Args: { p_approve: boolean; p_reason: string; p_student_id: string }
+        Returns: {
+          challenge_started: boolean
+          class: string
+          created_at: string
+          document_type: string | null
+          document_url: string | null
+          email: string | null
+          id: string
+          mobile_number: string
+          photo_url: string | null
+          rejection_reason: string | null
+          school_name: string
+          student_name: string
+          updated_at: string
+          user_id: string
+          verification_status: Database["public"]["Enums"]["verification_status"]
+          verified_at: string | null
+          verified_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "students"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      submit_for_verification: {
+        Args: {
+          p_document_type: string
+          p_document_url: string
+          p_photo_url: string
+        }
+        Returns: {
+          challenge_started: boolean
+          class: string
+          created_at: string
+          document_type: string | null
+          document_url: string | null
+          email: string | null
+          id: string
+          mobile_number: string
+          photo_url: string | null
+          rejection_reason: string | null
+          school_name: string
+          student_name: string
+          updated_at: string
+          user_id: string
+          verification_status: Database["public"]["Enums"]["verification_status"]
+          verified_at: string | null
+          verified_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "students"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       teacher_balance: {
         Args: { _teacher_id: string }
         Returns: {
@@ -585,6 +705,7 @@ export type Database = {
       exam_shift: "day" | "night"
       exam_type: "mid" | "final"
       teacher_status: "pending" | "approved" | "rejected" | "suspended"
+      verification_status: "not_submitted" | "pending" | "verified" | "rejected"
       withdrawal_status: "requested" | "approved" | "paid" | "rejected"
     }
     CompositeTypes: {
@@ -724,6 +845,7 @@ export const Constants = {
       exam_shift: ["day", "night"],
       exam_type: ["mid", "final"],
       teacher_status: ["pending", "approved", "rejected", "suspended"],
+      verification_status: ["not_submitted", "pending", "verified", "rejected"],
       withdrawal_status: ["requested", "approved", "paid", "rejected"],
     },
   },

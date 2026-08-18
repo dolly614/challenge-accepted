@@ -2,204 +2,123 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { useEffect, useState } from "react";
-import { ShieldCheck, Lock, BadgeCheck, IdCard, Upload, CheckCircle2 } from "lucide-react";
-import { Loader2 } from "lucide-react";
+import { ShieldCheck, Lock, BadgeCheck, IdCard, Upload, CheckCircle2, XCircle, Clock, Loader2 } from "lucide-react";
 import { attributeReferral, getTeacherByCode } from "@/lib/teachers";
-import { supabase } from "@/integrations/supabase/client";
 import { BrandMark } from "@/components/site/BrandMark";
-import Tesseract from "tesseract.js";
-import { useServerFn } from "@tanstack/react-start";
-import { verifyStudentId } from "@/lib/verify-id.functions";
+import {
+  registerStudent, uploadVerificationDocument, uploadStudentPhoto,
+  submitForVerification, getMyStudentRecord, subscribeToMyVerificationStatus,
+  startChallenge, type DocumentType, type Student,
+} from "@/lib/registration";
 
 export const Route = createFileRoute("/register")({
   validateSearch: (s: Record<string, unknown>): { ref?: string } => (typeof s.ref === "string" ? { ref: s.ref } : {}),
-  head: () => ({ meta: [{ title: "Register Free — Uyanix 30 Days Challenge" }, { name: "description", content: "FREE registration. Exam fee sirf tab jab aap challenge complete karein." }] }),
+  head: () => ({
+    meta: [
+      { title: "Register Free — Uyanix 30 Days Challenge" },
+      { name: "description", content: "FREE registration. Student ID verify karein aur 30 Days Challenge shuru karein." },
+      { property: "og:title", content: "Register Free — Uyanix 30 Days Challenge" },
+      { property: "og:description", content: "Account banayein, student ID verify karein aur challenge unlock karein." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: Register,
 });
+
+const DOCS: { key: DocumentType; label: string }[] = [
+  { key: "school_id_card", label: "School ID Card" },
+  { key: "birth_certificate", label: "Birth Certificate" },
+  { key: "aadhaar_card", label: "Aadhaar Card" },
+];
 
 function Register() {
   const nav = useNavigate();
   const { ref } = Route.useSearch();
-  const [form, setForm] = useState({ name: "", fatherName: "", idNumber: "", cls: "5", school: "", city: "", mobile: "", email: "", password: "" });
-  const [idCard, setIdCard] = useState<{ name: string; dataUrl: string } | null>(null);
-  const [studentPhoto, setStudentPhoto] = useState<{ name: string; dataUrl: string } | null>(null);
-  const [photoError, setPhotoError] = useState<string | null>(null);
-  const [idError, setIdError] = useState<string | null>(null);
-  const [idVerifying, setIdVerifying] = useState(false);
-  const [idVerified, setIdVerified] = useState(false);
-  const [idOcrText, setIdOcrText] = useState<string>("");
-  const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [form, setForm] = useState({ name: "", cls: "5", school: "", mobile: "", email: "", password: "" });
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agree, setAgree] = useState(false);
   const [stepError, setStepError] = useState<string | null>(null);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [loading, setLoading] = useState(false);
   const [referrer, setReferrer] = useState<{ name: string; code: string } | null>(null);
-  const runVerify = useServerFn(verifyStudentId);
+
+  const [docType, setDocType] = useState<DocumentType>("school_id_card");
+  const [docFile, setDocFile] = useState<File | null>(null);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [student, setStudent] = useState<Student | null>(null);
 
   useEffect(() => {
     if (!ref) return;
     void getTeacherByCode(ref).then(t => { if (t) setReferrer({ name: t.name, code: t.code }); });
   }, [ref]);
 
-  const upd = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm(s => ({ ...s, [k]: e.target.value }));
+  // Agar student pehle se logged in hai to uska current status dikhao.
+  useEffect(() => {
+    void getMyStudentRecord().then(s => {
+      if (!s) return;
+      setStudent(s);
+      if (s.verification_status === "not_submitted") setStep(2);
+      else setStep(3);
+    }).catch(() => {});
+  }, []);
 
-  async function onIdUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    setIdError(null);
-    setIdVerified(false);
-    setIdCard(null);
-    setIdOcrText("");
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) {
-      setIdError("Sirf PNG / JPG / WEBP image upload karein.");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setIdError("File 5MB se kam honi chahiye.");
-      return;
-    }
-    const dataUrl: string = await new Promise((res, rej) => {
-      const r = new FileReader();
-      r.onload = () => res(String(r.result));
-      r.onerror = () => rej(r.error);
-      r.readAsDataURL(file);
-    });
-    setIdVerifying(true);
-    try {
-      const { data } = await Tesseract.recognize(dataUrl, "eng");
-      const text = (data.text || "").replace(/\s+/g, " ");
-      setIdOcrText(text);
-      setIdCard({ name: file.name, dataUrl });
-      setIdVerified(true);
-    } catch {
-      setIdError("ID card verify nahi ho paya. Dobara try karein ya behtar quality ka photo upload karein.");
-    } finally {
-      setIdVerifying(false);
-    }
-  }
+  // Live status: pending → verified / rejected bina refresh ke.
+  useEffect(() => {
+    if (!student?.id) return;
+    return subscribeToMyVerificationStatus(student.id, setStudent);
+  }, [student?.id]);
 
-  async function onPhotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    setPhotoError(null);
-    setStudentPhoto(null);
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) {
-      setPhotoError("Sirf PNG / JPG / WEBP image upload karein.");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setPhotoError("File 5MB se kam honi chahiye.");
-      return;
-    }
-    const dataUrl: string = await new Promise((res, rej) => {
-      const r = new FileReader();
-      r.onload = () => res(String(r.result));
-      r.onerror = () => rej(r.error);
-      r.readAsDataURL(file);
-    });
-    setStudentPhoto({ name: file.name, dataUrl });
-  }
+  const upd = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+    setForm(s => ({ ...s, [k]: e.target.value }));
 
-  const [submitError, setSubmitError] = useState<string | null>(null);
-
-  async function uploadDoc(userId: string, kind: "id-card" | "photo", dataUrl: string, fileName: string) {
-    const blob = await (await fetch(dataUrl)).blob();
-    const ext = (fileName.split(".").pop() || "jpg").toLowerCase();
-    await supabase.storage
-      .from("student-documents")
-      .upload(`${userId}/${kind}.${ext}`, blob, { upsert: true, contentType: blob.type });
-  }
-
-  async function submit(e: React.FormEvent) {
+  async function createAccount(e: React.FormEvent) {
     e.preventDefault();
-    setSubmitError(null);
-    if (!idCard) {
-      setIdError("Verification ke liye ID card ka photo upload karein.");
-      return;
-    }
-    if (!idVerified) {
-      setIdError("ID card verify nahi hua. Kripya saaf ID card upload karein.");
-      return;
-    }
-    if (!studentPhoto) {
-      setPhotoError("Apni ek clear photo upload karein.");
-      return;
-    }
+    setStepError(null);
+    if (form.password !== confirmPassword) { setStepError("Password aur Confirm Password same hone chahiye."); return; }
+    if (!agree) { setStepError("Terms & Conditions accept karein."); return; }
     setLoading(true);
     try {
-      const v = await runVerify({
-        data: {
-          idCard: idCard.dataUrl,
-          photo: studentPhoto.dataUrl,
-          name: form.name,
-          fatherName: form.fatherName,
-          school: form.school,
-          idNumber: form.idNumber,
-        },
-      });
-      if (!v.ok) {
-        const missing = [
-          !v.nameMatch && "Student Name",
-          !v.fatherMatch && "Father Name",
-          !v.idNumberMatch && `ID Number${v.idNumberFound ? ` (card par: ${v.idNumberFound})` : ""}`,
-          !v.photoMatch && "Photo (chehra ID card se match nahi)",
-        ].filter(Boolean).join(", ");
-        setIdError(`Verification fail ❌ — mismatch: ${missing}.${v.reason ? ` ${v.reason}` : ""}`);
-        setLoading(false);
-        return;
-      }
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: form.email,
+      await registerStudent({
+        studentName: form.name,
+        studentClass: form.cls,
+        schoolName: form.school,
+        mobileNumber: `+91${form.mobile.replace(/\D/g, "")}`,
         password: form.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
-          data: { full_name: form.name, class_level: form.cls },
-        },
+        email: form.email || undefined,
       });
-      if (signUpError) throw signUpError;
-
-      const userId = signUpData.user?.id;
-      if (userId && signUpData.session) {
-        await uploadDoc(userId, "id-card", idCard.dataUrl, idCard.name);
-        await uploadDoc(userId, "photo", studentPhoto.dataUrl, studentPhoto.name);
-        await supabase.from("profiles").update({
-          full_name: form.name,
-          class_level: Number(form.cls),
-          school: form.school,
-          phone: form.mobile,
-        }).eq("id", userId);
-      }
-
       if (ref) {
         await attributeReferral({
-          code: ref,
-          studentName: form.name, studentEmail: form.email,
+          code: ref, studentName: form.name, studentEmail: form.email,
           studentPhone: form.mobile, studentClass: form.cls, amount: 0,
         });
       }
+      const rec = await getMyStudentRecord();
+      setStudent(rec);
+      setStep(2);
+    } catch (err: any) {
+      setStepError(err?.message || "Registration fail ho gaya. Dobara try karein.");
+    } finally { setLoading(false); }
+  }
 
-      // No student data is cached in the browser — everything lives in the RLS-protected profiles table.
+  async function submitDocs(e: React.FormEvent) {
+    e.preventDefault();
+    setSubmitError(null);
+    if (!docFile) { setSubmitError("Verification document upload karein."); return; }
+    setLoading(true);
+    try {
+      const docPath = await uploadVerificationDocument(docFile);
+      const photoPath = photoFile ? await uploadStudentPhoto(photoFile) : null;
+      const rec = await submitForVerification(docType, docPath, photoPath);
+      setStudent(rec);
       setStep(3);
     } catch (err: any) {
-      setSubmitError(err?.message || "Registration fail ho gaya. Dobara try karein.");
-    } finally {
-      setLoading(false);
-    }
+      setSubmitError(err?.message || "Submit nahi ho paya. Dobara try karein.");
+    } finally { setLoading(false); }
   }
 
-  function goToStep2(e: React.FormEvent) {
-    e.preventDefault();
-    setStepError(null);
-    if (form.password !== confirmPassword) {
-      setStepError("Password aur Confirm Password same hone chahiye.");
-      return;
-    }
-    if (!agree) {
-      setStepError("Terms & Conditions accept karein.");
-      return;
-    }
-    setStep(2);
-  }
+  const status = student?.verification_status ?? "pending";
 
   return (
     <div className="min-h-screen bg-background">
@@ -223,29 +142,29 @@ function Register() {
           <Stepper step={step} />
 
           {step === 1 && (
-          <form onSubmit={goToStep2} className="mt-8 space-y-4 rounded-3xl border border-border bg-card p-6 shadow-card">
+          <form onSubmit={createAccount} className="mt-8 space-y-4 rounded-3xl border border-border bg-card p-6 shadow-card">
             <div className="text-center">
               <h2 className="text-xl font-bold">Create Your Account</h2>
               <p className="text-xs text-muted-foreground">30-Day Challenge ke liye register karein</p>
             </div>
-            <Field label="Student Full Name"><input required value={form.name} onChange={upd("name")} placeholder="Aarav Sharma" className={fieldCls} /></Field>
-            <Field label="Father's Full Name"><input required value={form.fatherName} onChange={upd("fatherName")} placeholder="Rajesh Sharma" className={fieldCls} /></Field>
-            <Field label="ID Card / Document Number"><input required value={form.idNumber} onChange={upd("idNumber")} placeholder="School ID / Aadhaar number" className={fieldCls} /></Field>
+            <Field label="Student Name"><input required value={form.name} onChange={upd("name")} placeholder="Enter your full name" className={fieldCls} /></Field>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Class">
                 <select value={form.cls} onChange={upd("cls")} className={fieldCls}>
                   {Array.from({ length: 12 }).map((_, i) => <option key={i+1} value={i+1}>Class {i+1}</option>)}
                 </select>
               </Field>
-              <Field label="City"><input required value={form.city} onChange={upd("city")} placeholder="Mumbai" className={fieldCls}/></Field>
+              <Field label="School Name"><input required value={form.school} onChange={upd("school")} placeholder="Enter school name" className={fieldCls}/></Field>
             </div>
-            <Field label="School Name"><input required value={form.school} onChange={upd("school")} placeholder="Delhi Public School" className={fieldCls}/></Field>
+            <Field label="Mobile Number">
+              <div className="flex gap-2">
+                <span className="inline-flex h-11 items-center rounded-xl border border-input bg-accent/50 px-3 text-sm font-semibold text-muted-foreground">+91</span>
+                <input required type="tel" pattern="[0-9]{10}" value={form.mobile} onChange={upd("mobile")} placeholder="Enter mobile number" className={fieldCls}/>
+              </div>
+            </Field>
+            <Field label="Email (optional)"><input type="email" value={form.email} onChange={upd("email")} placeholder="parent@email.com" className={fieldCls}/></Field>
             <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Parent Mobile"><input required type="tel" pattern="[0-9]{10}" value={form.mobile} onChange={upd("mobile")} placeholder="9876543210" className={fieldCls}/></Field>
-              <Field label="Parent Email"><input required type="email" value={form.email} onChange={upd("email")} placeholder="parent@email.com" className={fieldCls}/></Field>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field label="Password"><input required type="password" minLength={6} value={form.password} onChange={upd("password")} placeholder="Min 6 characters" className={fieldCls}/></Field>
+              <Field label="Password"><input required type="password" minLength={6} value={form.password} onChange={upd("password")} placeholder="Create password" className={fieldCls}/></Field>
               <Field label="Confirm Password"><input required type="password" minLength={6} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm password" className={fieldCls}/></Field>
             </div>
             <label className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -253,8 +172,8 @@ function Register() {
               I agree to the <span className="font-semibold text-primary">Terms &amp; Conditions</span>
             </label>
             {stepError && <p className="text-center text-xs font-medium text-destructive">{stepError}</p>}
-            <button className="mt-2 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-gradient-hero text-sm font-semibold text-primary-foreground shadow-soft transition hover:scale-[1.01]">
-              Create Account &amp; Continue →
+            <button disabled={loading} className="mt-2 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-gradient-hero text-sm font-semibold text-primary-foreground shadow-soft transition hover:scale-[1.01] disabled:opacity-60">
+              {loading ? <><Loader2 className="h-4 w-4 animate-spin"/> Please wait…</> : <>Create Account &amp; Continue →</>}
             </button>
             <p className="text-center text-xs text-muted-foreground">
               Already registered? <button type="button" onClick={() => nav({ to: "/login" })} className="font-semibold text-primary">Login</button>
@@ -263,57 +182,39 @@ function Register() {
           )}
 
           {step === 2 && (
-          <form onSubmit={submit} className="mt-8 space-y-4 rounded-3xl border border-border bg-card p-6 shadow-card">
+          <form onSubmit={submitDocs} className="mt-8 space-y-4 rounded-3xl border border-border bg-card p-6 shadow-card">
             <div className="text-center">
               <h2 className="text-xl font-bold">Verify Your Student ID</h2>
               <p className="text-xs text-muted-foreground">Apni student identity verify karein aur challenge unlock karein.</p>
             </div>
-            <div className="flex flex-wrap justify-center gap-2 text-[11px] font-semibold text-muted-foreground">
-              {["School ID Card", "Birth Certificate", "Aadhaar Card"].map(d => (
-                <span key={d} className="rounded-full border border-border bg-accent/50 px-3 py-1">{d}</span>
-              ))}
-            </div>
             <Field label="Student ID / Verification Document">
+              <div className="mb-3 flex flex-wrap gap-2 text-[11px] font-semibold">
+                {DOCS.map(d => (
+                  <button key={d.key} type="button" onClick={() => setDocType(d.key)}
+                    className={`rounded-full border px-3 py-1 transition ${docType === d.key ? "border-primary bg-primary/10 text-primary" : "border-border bg-accent/50 text-muted-foreground"}`}>
+                    {d.label}
+                  </button>
+                ))}
+              </div>
               <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-dashed border-input bg-background px-4 py-3 text-sm transition hover:border-primary">
                 <span className="flex items-center gap-2 text-muted-foreground">
                   <IdCard className="h-4 w-4 text-primary" />
-                  {idVerifying ? (
-                    <span className="flex items-center gap-1.5 text-foreground"><Loader2 className="h-4 w-4 animate-spin text-primary" /> Verifying ID card…</span>
-                  ) : idCard ? (
-                    <span className="flex items-center gap-1.5 text-foreground"><CheckCircle2 className="h-4 w-4 text-secondary" /> {idCard.name}</span>
-                  ) : (
-                    <>School ID / Aadhaar / Birth Certificate</>
-                  )}
+                  {docFile ? <span className="flex items-center gap-1.5 text-foreground"><CheckCircle2 className="h-4 w-4 text-secondary" /> {docFile.name}</span> : <>Upload Document</>}
                 </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"><Upload className="h-3 w-3" /> {idCard ? "Change" : "Upload"}</span>
-                <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" disabled={idVerifying} onChange={onIdUpload} />
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"><Upload className="h-3 w-3" /> {docFile ? "Change" : "Upload"}</span>
+                <input type="file" accept="image/png,image/jpeg,application/pdf" className="hidden" onChange={(e) => setDocFile(e.target.files?.[0] ?? null)} />
               </label>
-              {idCard && (
-                <img src={idCard.dataUrl} alt="ID preview" className="mt-3 h-28 w-auto rounded-lg border border-border object-cover" />
-              )}
-              {idVerified && !idError && (
-                <p className="mt-1.5 text-xs font-medium text-secondary">✅ ID card verified. Ab form ki details ID se match honi chahiye.</p>
-              )}
-              {idError && <p className="mt-1.5 text-xs font-medium text-destructive">{idError}</p>}
-              <p className="mt-1.5 text-[11px] text-muted-foreground">ID card par likha Student Name, Father Name aur ID Number form se match hona chahiye, aur ID card ka photo aapki uploaded photo se milna chahiye. JPG / PNG / WEBP, max 5MB.</p>
+              <p className="mt-1.5 text-[11px] text-muted-foreground">JPG, PNG or PDF · Maximum 5MB. Document par Student Name aur School Name clearly visible hona chahiye.</p>
             </Field>
-            <Field label="Student Photo (Clear face photo)">
+            <Field label="Student Photo">
               <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-dashed border-input bg-background px-4 py-3 text-sm transition hover:border-primary">
                 <span className="flex items-center gap-2 text-muted-foreground">
                   <IdCard className="h-4 w-4 text-primary" />
-                  {studentPhoto ? (
-                    <span className="flex items-center gap-1.5 text-foreground"><CheckCircle2 className="h-4 w-4 text-secondary" /> {studentPhoto.name}</span>
-                  ) : (
-                    <>Apni recent clear photo upload karein</>
-                  )}
+                  {photoFile ? <span className="flex items-center gap-1.5 text-foreground"><CheckCircle2 className="h-4 w-4 text-secondary" /> {photoFile.name}</span> : <>Upload a recent clear face photo</>}
                 </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"><Upload className="h-3 w-3" /> {studentPhoto ? "Change" : "Upload"}</span>
-                <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={onPhotoUpload} />
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary"><Upload className="h-3 w-3" /> {photoFile ? "Change" : "Upload"}</span>
+                <input type="file" accept="image/png,image/jpeg" className="hidden" onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)} />
               </label>
-              {studentPhoto && (
-                <img src={studentPhoto.dataUrl} alt="Student preview" className="mt-3 h-28 w-28 rounded-lg border border-border object-cover" />
-              )}
-              {photoError && <p className="mt-1.5 text-xs font-medium text-destructive">{photoError}</p>}
             </Field>
             <div className="rounded-xl border border-border bg-accent/50 px-4 py-3 text-[11px] text-muted-foreground">
               Aapki details Teacher/Admin team check karegi. Status: <b className="text-primary">Verification Pending</b>
@@ -322,25 +223,52 @@ function Register() {
               <BadgeCheck className="h-4 w-4"/> {loading ? "Submitting..." : "Submit for Verification →"}
             </button>
             {submitError && <p className="text-center text-xs font-medium text-destructive">{submitError}</p>}
-            <button type="button" onClick={() => setStep(1)} className="w-full text-center text-xs font-semibold text-muted-foreground">← Back to details</button>
             <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
               <Lock className="h-3 w-3"/> Koi payment nahi. Exam time pe pay karein.
             </div>
           </form>
           )}
 
-          {step === 3 && (
+          {step === 3 && status === "pending" && (
           <div className="mt-8 space-y-4 rounded-3xl border border-border bg-card p-8 text-center shadow-card">
             <CheckCircle2 className="mx-auto h-14 w-14 text-secondary" />
             <h2 className="text-xl font-bold">Verification Submitted Successfully! 🎉</h2>
-            <p className="text-sm text-muted-foreground">Aapke documents review ke liye submit ho gaye hain. Teacher/Admin review ke baad verification complete hoti hai.</p>
+            <p className="text-sm text-muted-foreground">Aapke documents review ke liye submit ho gaye hain. Usually verification Teacher/Admin review ke baad complete hoti hai.</p>
             <div className="mx-auto inline-flex items-center gap-2 rounded-full border border-border bg-accent/60 px-4 py-2 text-xs font-semibold">
-              Status: <span className="text-primary">Verification Pending</span>
+              Status: <span className="inline-flex items-center gap-1 text-primary"><Clock className="h-3 w-3"/> Verification Pending</span>
             </div>
             <button onClick={() => nav({ to: "/dashboard" })} className="inline-flex h-12 w-full items-center justify-center rounded-full bg-gradient-hero text-sm font-semibold text-primary-foreground shadow-soft transition hover:scale-[1.01]">
               Go to Dashboard →
             </button>
             <p className="text-[11px] text-muted-foreground">Verification complete hone par aapko notification mil jayega.</p>
+          </div>
+          )}
+
+          {step === 3 && status === "verified" && (
+          <div className="mt-8 space-y-4 rounded-3xl border border-secondary/30 bg-secondary/5 p-8 text-center shadow-card">
+            <CheckCircle2 className="mx-auto h-14 w-14 text-secondary" />
+            <h2 className="text-xl font-bold text-secondary">✓ Student Verified</h2>
+            <p className="text-sm text-muted-foreground">Aapka account successfully verify ho gaya hai. Ab aap Uyanix 30 Days Challenge me participate kar sakte hain.</p>
+            <button
+              onClick={async () => { if (student) await startChallenge(student.id); nav({ to: "/dashboard" }); }}
+              className="inline-flex h-12 w-full items-center justify-center rounded-full bg-gradient-hero text-sm font-semibold text-primary-foreground shadow-soft transition hover:scale-[1.01]">
+              Start Challenge →
+            </button>
+          </div>
+          )}
+
+          {step === 3 && status === "rejected" && (
+          <div className="mt-8 space-y-4 rounded-3xl border border-destructive/30 bg-destructive/5 p-8 text-center shadow-card">
+            <XCircle className="mx-auto h-14 w-14 text-destructive" />
+            <h2 className="text-xl font-bold text-destructive">Verification Not Approved</h2>
+            <p className="text-sm text-muted-foreground">
+              {student?.rejection_reason || "Please upload a clearer School ID / valid document."}
+            </p>
+            <button onClick={() => { setDocFile(null); setPhotoFile(null); setStep(2); }}
+              className="inline-flex h-12 w-full items-center justify-center rounded-full bg-destructive text-sm font-semibold text-destructive-foreground shadow-soft transition hover:scale-[1.01]">
+              Upload Again →
+            </button>
+            <p className="text-[11px] text-muted-foreground">Agar aapko koi dikkat ho, to apne Teacher/Admin se contact karein.</p>
           </div>
           )}
         </div>

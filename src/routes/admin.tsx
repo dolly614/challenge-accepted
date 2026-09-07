@@ -8,6 +8,8 @@ import { ChaptersManager } from "@/components/admin/ChaptersManager";
 import { BulkImport } from "@/components/admin/BulkImport";
 import { TeachersPanel } from "@/components/admin/TeachersPanel";
 import { BrandPanel } from "@/components/admin/BrandPanel";
+import { StudentVerifications } from "@/components/admin/StudentVerifications";
+
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "@tanstack/react-router";
 
@@ -120,8 +122,10 @@ function Admin() {
 
         <BulkImport />
         <ChaptersManager />
+        <StudentVerifications />
         <TeachersPanel />
         <BrandPanel />
+
       </section>
       <Footer />
     </div>

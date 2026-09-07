@@ -120,8 +120,10 @@ function Admin() {
 
         <BulkImport />
         <ChaptersManager />
+        <StudentVerifications />
         <TeachersPanel />
         <BrandPanel />
+
       </section>
       <Footer />
     </div>

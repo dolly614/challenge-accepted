@@ -56,6 +56,39 @@ export type Database = {
           },
         ]
       }
+      audit_logs: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          result: string
+          target_id: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          result?: string
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          result?: string
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Relationships: []
+      }
       exam_attempts: {
         Row: {
           correct_count: number | null
@@ -242,6 +275,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      rate_limits: {
+        Row: {
+          bucket: string
+          count: number
+          created_at: string
+          id: string
+          identifier: string
+          window_start: string
+        }
+        Insert: {
+          bucket: string
+          count?: number
+          created_at?: string
+          id?: string
+          identifier: string
+          window_start?: string
+        }
+        Update: {
+          bucket?: string
+          count?: number
+          created_at?: string
+          id?: string
+          identifier?: string
+          window_start?: string
+        }
+        Relationships: []
       }
       students: {
         Row: {
@@ -541,6 +601,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_accounts: {
+        Row: {
+          created_at: string
+          status: Database["public"]["Enums"]["account_status"]
+          status_reason: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          status?: Database["public"]["Enums"]["account_status"]
+          status_reason?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          status?: Database["public"]["Enums"]["account_status"]
+          status_reason?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -611,6 +695,15 @@ export type Database = {
         }
         Returns: Json
       }
+      consume_rate_limit: {
+        Args: {
+          _bucket: string
+          _identifier: string
+          _limit: number
+          _window_seconds: number
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -618,6 +711,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_account_active: { Args: { _user_id: string }; Returns: boolean }
       review_student_verification: {
         Args: { p_approve: boolean; p_reason: string; p_student_id: string }
         Returns: {
@@ -646,6 +740,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      server_now: { Args: never; Returns: string }
       submit_for_verification: {
         Args: {
           p_document_type: string
@@ -693,9 +788,21 @@ export type Database = {
           name: string
         }[]
       }
+      write_audit_log: {
+        Args: {
+          _action: string
+          _actor: string
+          _metadata: Json
+          _result: string
+          _target_id: string
+          _target_type: string
+        }
+        Returns: string
+      }
     }
     Enums: {
-      app_role: "admin" | "student"
+      account_status: "active" | "suspended" | "blocked"
+      app_role: "admin" | "student" | "teacher"
       attempt_status:
         | "in_progress"
         | "submitted"
@@ -834,7 +941,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "student"],
+      account_status: ["active", "suspended", "blocked"],
+      app_role: ["admin", "student", "teacher"],
       attempt_status: [
         "in_progress",
         "submitted",

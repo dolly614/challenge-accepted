@@ -78,10 +78,10 @@ export async function audit(entry: {
   try {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin.rpc("write_audit_log", {
-      _actor: entry.actorId ?? null,
+      _actor: (entry.actorId ?? null) as unknown as string,
       _action: entry.action,
-      _target_type: entry.targetType ?? null,
-      _target_id: entry.targetId ?? null,
+      _target_type: (entry.targetType ?? null) as unknown as string,
+      _target_id: (entry.targetId ?? null) as unknown as string,
       _result: entry.result ?? "success",
       _metadata: (entry.metadata ?? {}) as never,
     });

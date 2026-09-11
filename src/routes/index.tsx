@@ -21,17 +21,22 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
+  const home = Route.useLoaderData();
+  const students = (home?.stats.studentsRegistered || 12847).toLocaleString("en-IN");
+  const cities = home?.stats.citiesCovered || 320;
+  const items = home?.testimonials.length ? home.testimonials : fallbackTestimonials;
+  const questions = home?.faqs.length ? home.faqs : fallbackFaqs;
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <Hero />
-      <SocialProof />
+      <SocialProof students={students} cities={cities} />
       <HowItWorks />
       <Prizes />
-      <Countdown2 />
-      <Testimonials />
-      <Faq />
-      <CTA />
+      <Countdown2 deadline={home?.config.closesAt} serverNow={home?.config.serverNow} />
+      <Testimonials items={items} />
+      <Faq questions={questions} />
+      <CTA students={students} />
       <Footer />
       <StickyCta />
     </div>

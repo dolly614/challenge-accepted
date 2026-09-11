@@ -3,10 +3,12 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { Countdown } from "@/components/site/Countdown";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { testimonials, faqs } from "@/lib/data/challenge";
+import { testimonials as fallbackTestimonials, faqs as fallbackFaqs } from "@/lib/data/challenge";
+import { getHomeData } from "@/lib/home.functions";
 import { ClipboardList, GraduationCap, Sparkles, Trophy, Flame, ShieldCheck, Star, Users } from "lucide-react";
 
 export const Route = createFileRoute("/")({
+  loader: () => getHomeData(),
   head: () => ({
     meta: [
       { title: "Uyanix 30 Days Challenge — Seekho, Compete Karo, Jeeto!" },

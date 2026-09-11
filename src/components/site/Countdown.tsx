@@ -10,12 +10,17 @@ function calc(target: number) {
   };
 }
 
-export function Countdown() {
-  const target = typeof window !== "undefined"
-    ? Date.now() + 7 * 86400000
-    : Date.now() + 7 * 86400000;
+/**
+ * Visual only. The deadline comes from trusted server config; the local clock is
+ * corrected by the server timestamp so changing the device clock changes nothing.
+ * Actual registration availability is always enforced server-side.
+ */
+export function Countdown({ deadline, serverNow }: { deadline?: string; serverNow?: string } = {}) {
+  const skew = serverNow ? Date.now() - new Date(serverNow).getTime() : 0;
+  const target = (deadline ? new Date(deadline).getTime() : Date.now() + 7 * 86400000) + skew;
   const [t, setT] = useState(() => calc(target));
   useEffect(() => {
+    setT(calc(target));
     const id = setInterval(() => setT(calc(target)), 1000);
     return () => clearInterval(id);
   }, [target]);

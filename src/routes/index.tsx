@@ -3,10 +3,12 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { Countdown } from "@/components/site/Countdown";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { testimonials, faqs } from "@/lib/data/challenge";
+import { testimonials as fallbackTestimonials, faqs as fallbackFaqs } from "@/lib/data/challenge";
+import { getHomeData } from "@/lib/home.functions";
 import { ClipboardList, GraduationCap, Sparkles, Trophy, Flame, ShieldCheck, Star, Users } from "lucide-react";
 
 export const Route = createFileRoute("/")({
+  loader: () => getHomeData(),
   head: () => ({
     meta: [
       { title: "Uyanix 30 Days Challenge — Seekho, Compete Karo, Jeeto!" },
@@ -19,17 +21,22 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
+  const home = Route.useLoaderData();
+  const students = (home?.stats.studentsRegistered || 12847).toLocaleString("en-IN");
+  const cities = home?.stats.citiesCovered || 320;
+  const items = home?.testimonials.length ? home.testimonials : fallbackTestimonials;
+  const questions = home?.faqs.length ? home.faqs : fallbackFaqs;
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <Hero />
-      <SocialProof />
+      <SocialProof students={students} cities={cities} />
       <HowItWorks />
       <Prizes />
-      <Countdown2 />
-      <Testimonials />
-      <Faq />
-      <CTA />
+      <Countdown2 deadline={home?.config.closesAt} serverNow={home?.config.serverNow} />
+      <Testimonials items={items} />
+      <Faq questions={questions} />
+      <CTA students={students} />
       <Footer />
       <StickyCta />
     </div>
@@ -112,13 +119,13 @@ function Stat({ icon, v, l }: { icon: React.ReactNode; v: string; l: string }) {
   );
 }
 
-function SocialProof() {
+function SocialProof({ students, cities }: { students: string; cities: number }) {
   return (
     <section className="border-y border-border bg-card/60">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-around gap-4 px-4 py-5 text-sm text-muted-foreground sm:px-6">
-        <div className="flex items-center gap-2"><Users className="h-4 w-4 text-primary"/><span><b className="text-foreground">12,847</b> students already registered</span></div>
+        <div className="flex items-center gap-2"><Users className="h-4 w-4 text-primary"/><span><b className="text-foreground">{students}</b> students already registered</span></div>
         <div className="hidden h-6 w-px bg-border sm:block" />
-        <div className="flex items-center gap-2"><GraduationCap className="h-4 w-4 text-primary"/><span>Across <b className="text-foreground">320+</b> cities in India</span></div>
+        <div className="flex items-center gap-2"><GraduationCap className="h-4 w-4 text-primary"/><span>Across <b className="text-foreground">{cities}+</b> cities in India</span></div>
         <div className="hidden h-6 w-px bg-border sm:block" />
         <div className="flex items-center gap-2"><Trophy className="h-4 w-4 text-primary"/><span>Top 3 win <b className="text-foreground">Laptop, Tablet & Smartphone</b></span></div>
       </div>
@@ -184,7 +191,7 @@ function Prizes() {
   );
 }
 
-function Countdown2() {
+function Countdown2({ deadline, serverNow }: { deadline?: string; serverNow?: string }) {
   return (
     <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
       <div className="overflow-hidden rounded-3xl bg-gradient-hero p-8 text-primary-foreground shadow-soft md:p-12">
@@ -197,14 +204,14 @@ function Countdown2() {
               Register FREE
             </Link>
           </div>
-          <div className="flex justify-center md:justify-end"><Countdown /></div>
+          <div className="flex justify-center md:justify-end"><Countdown deadline={deadline} serverNow={serverNow} /></div>
         </div>
       </div>
     </section>
   );
 }
 
-function Testimonials() {
+function Testimonials({ items }: { items: { name: string; cls: string; text: string; emoji: string }[] }) {
   return (
     <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
       <div className="mx-auto max-w-2xl text-center">
@@ -212,7 +219,7 @@ function Testimonials() {
         <h2 className="mt-2 text-3xl font-bold sm:text-4xl">Students kya keh rahe hain</h2>
       </div>
       <div className="mt-12 grid gap-5 md:grid-cols-3">
-        {testimonials.map(t => (
+        {items.map(t => (
           <div key={t.name} className="rounded-3xl border border-border bg-card p-6 shadow-card">
             <div className="text-3xl">{t.emoji}</div>
             <p className="mt-3 text-sm leading-relaxed">"{t.text}"</p>
@@ -227,7 +234,7 @@ function Testimonials() {
   );
 }
 
-function Faq() {
+function Faq({ questions }: { questions: { q: string; a: string }[] }) {
   return (
     <section className="bg-accent/40 py-20">
       <div className="mx-auto max-w-3xl px-4 sm:px-6">
@@ -236,7 +243,7 @@ function Faq() {
           <h2 className="mt-2 text-3xl font-bold sm:text-4xl">Aapke sawaal, hamare jawaab</h2>
         </div>
         <Accordion type="single" collapsible className="mt-10 space-y-3">
-          {faqs.map((f, i) => (
+          {questions.map((f, i) => (
             <AccordionItem key={i} value={`f-${i}`} className="rounded-2xl border border-border bg-card px-5">
               <AccordionTrigger className="text-left font-semibold">{f.q}</AccordionTrigger>
               <AccordionContent className="text-muted-foreground">{f.a}</AccordionContent>
@@ -248,12 +255,12 @@ function Faq() {
   );
 }
 
-function CTA() {
+function CTA({ students }: { students: string }) {
   return (
     <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
       <div className="rounded-3xl border border-border bg-card p-10 text-center shadow-card">
         <h2 className="text-3xl font-bold sm:text-4xl">Ready ho? <span className="text-gradient">Challenge accept karo!</span></h2>
-        <p className="mx-auto mt-3 max-w-xl text-muted-foreground">12,847+ students already in. Aap kab join karoge?</p>
+        <p className="mx-auto mt-3 max-w-xl text-muted-foreground">{students}+ students already in. Aap kab join karoge?</p>
         <Link to="/register" className="mt-7 inline-flex h-12 items-center rounded-full bg-gradient-hero px-8 text-sm font-semibold text-primary-foreground shadow-soft transition hover:scale-[1.03]">
           Register FREE
         </Link>

@@ -23,6 +23,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DailyDayRouteImport } from './routes/daily.$day'
 import { Route as AdminExamsRouteImport } from './routes/admin.exams'
+import { Route as ApiPublicHomeRouteImport } from './routes/api/public/home'
 import { Route as AdminExamsExamIdRouteImport } from './routes/admin.exams.$examId'
 
 const TeacherRoute = TeacherRouteImport.update({
@@ -95,6 +96,11 @@ const AdminExamsRoute = AdminExamsRouteImport.update({
   path: '/exams',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiPublicHomeRoute = ApiPublicHomeRouteImport.update({
+  id: '/api/public/home',
+  path: '/api/public/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminExamsExamIdRoute = AdminExamsExamIdRouteImport.update({
   id: '/$examId',
   path: '/$examId',
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/admin/exams': typeof AdminExamsRouteWithChildren
   '/daily/$day': typeof DailyDayRoute
   '/admin/exams/$examId': typeof AdminExamsExamIdRoute
+  '/api/public/home': typeof ApiPublicHomeRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -134,6 +141,7 @@ export interface FileRoutesByTo {
   '/admin/exams': typeof AdminExamsRouteWithChildren
   '/daily/$day': typeof DailyDayRoute
   '/admin/exams/$examId': typeof AdminExamsExamIdRoute
+  '/api/public/home': typeof ApiPublicHomeRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -152,6 +160,7 @@ export interface FileRoutesById {
   '/admin/exams': typeof AdminExamsRouteWithChildren
   '/daily/$day': typeof DailyDayRoute
   '/admin/exams/$examId': typeof AdminExamsExamIdRoute
+  '/api/public/home': typeof ApiPublicHomeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -171,6 +180,7 @@ export interface FileRouteTypes {
     | '/admin/exams'
     | '/daily/$day'
     | '/admin/exams/$examId'
+    | '/api/public/home'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -188,6 +198,7 @@ export interface FileRouteTypes {
     | '/admin/exams'
     | '/daily/$day'
     | '/admin/exams/$examId'
+    | '/api/public/home'
   id:
     | '__root__'
     | '/'
@@ -205,6 +216,7 @@ export interface FileRouteTypes {
     | '/admin/exams'
     | '/daily/$day'
     | '/admin/exams/$examId'
+    | '/api/public/home'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -221,6 +233,7 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   TeacherRoute: typeof TeacherRoute
   DailyDayRoute: typeof DailyDayRoute
+  ApiPublicHomeRoute: typeof ApiPublicHomeRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -323,6 +336,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminExamsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/public/home': {
+      id: '/api/public/home'
+      path: '/api/public/home'
+      fullPath: '/api/public/home'
+      preLoaderRoute: typeof ApiPublicHomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/exams/$examId': {
       id: '/admin/exams/$examId'
       path: '/$examId'
@@ -369,6 +389,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   TeacherRoute: TeacherRoute,
   DailyDayRoute: DailyDayRoute,
+  ApiPublicHomeRoute: ApiPublicHomeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

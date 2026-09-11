@@ -196,6 +196,149 @@ export type Database = {
         }
         Relationships: []
       }
+      faqs: {
+        Row: {
+          answer: string
+          created_at: string
+          id: string
+          internal_note: string | null
+          is_published: boolean
+          order_index: number
+          question: string
+          updated_at: string
+        }
+        Insert: {
+          answer: string
+          created_at?: string
+          id?: string
+          internal_note?: string | null
+          is_published?: boolean
+          order_index?: number
+          question: string
+          updated_at?: string
+        }
+        Update: {
+          answer?: string
+          created_at?: string
+          id?: string
+          internal_note?: string | null
+          is_published?: boolean
+          order_index?: number
+          question?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      homepage_stats: {
+        Row: {
+          cities_covered: number
+          created_at: string
+          id: boolean
+          students_registered: number
+          updated_at: string
+          use_live_counts: boolean
+        }
+        Insert: {
+          cities_covered?: number
+          created_at?: string
+          id?: boolean
+          students_registered?: number
+          updated_at?: string
+          use_live_counts?: boolean
+        }
+        Update: {
+          cities_covered?: number
+          created_at?: string
+          id?: boolean
+          students_registered?: number
+          updated_at?: string
+          use_live_counts?: boolean
+        }
+        Relationships: []
+      }
+      payment_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          payload: Json
+          payment_id: string | null
+          provider_event_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          payload?: Json
+          payment_id?: string | null
+          provider_event_id: string
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+          payment_id?: string | null
+          provider_event_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_events_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount_paise: number
+          created_at: string
+          currency: string
+          id: string
+          idempotency_key: string
+          metadata: Json
+          provider: string
+          provider_order_id: string | null
+          provider_payment_id: string | null
+          purpose: string
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount_paise: number
+          created_at?: string
+          currency?: string
+          id?: string
+          idempotency_key: string
+          metadata?: Json
+          provider?: string
+          provider_order_id?: string | null
+          provider_payment_id?: string | null
+          purpose: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount_paise?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          idempotency_key?: string
+          metadata?: Json
+          provider?: string
+          provider_order_id?: string | null
+          provider_payment_id?: string | null
+          purpose?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           class_level: number | null
@@ -300,6 +443,33 @@ export type Database = {
           id?: string
           identifier?: string
           window_start?: string
+        }
+        Relationships: []
+      }
+      site_config: {
+        Row: {
+          batch_name: string
+          created_at: string
+          id: boolean
+          registration_closes_at: string
+          registration_opens_at: string
+          updated_at: string
+        }
+        Insert: {
+          batch_name?: string
+          created_at?: string
+          id?: boolean
+          registration_closes_at?: string
+          registration_opens_at?: string
+          updated_at?: string
+        }
+        Update: {
+          batch_name?: string
+          created_at?: string
+          id?: boolean
+          registration_closes_at?: string
+          registration_opens_at?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -601,6 +771,45 @@ export type Database = {
         }
         Relationships: []
       }
+      testimonials: {
+        Row: {
+          class_info: string
+          created_at: string
+          display_name: string
+          emoji: string
+          id: string
+          internal_note: string | null
+          is_approved: boolean
+          order_index: number
+          quote: string
+          updated_at: string
+        }
+        Insert: {
+          class_info: string
+          created_at?: string
+          display_name: string
+          emoji?: string
+          id?: string
+          internal_note?: string | null
+          is_approved?: boolean
+          order_index?: number
+          quote: string
+          updated_at?: string
+        }
+        Update: {
+          class_info?: string
+          created_at?: string
+          display_name?: string
+          emoji?: string
+          id?: string
+          internal_note?: string | null
+          is_approved?: boolean
+          order_index?: number
+          quote?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_accounts: {
         Row: {
           created_at: string
@@ -712,6 +921,7 @@ export type Database = {
         Returns: boolean
       }
       is_account_active: { Args: { _user_id: string }; Returns: boolean }
+      registration_status: { Args: never; Returns: Json }
       review_student_verification: {
         Args: { p_approve: boolean; p_reason: string; p_student_id: string }
         Returns: {

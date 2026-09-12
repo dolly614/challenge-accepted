@@ -183,9 +183,10 @@ export async function listPendingVerifications(): Promise<Student[]> {
 
 /* ---------------- START CHALLENGE ---------------- */
 
-export async function startChallenge(studentId: string): Promise<Student> {
-  const { data, error } = await db
-    .from("students").update({ challenge_started: true }).eq("id", studentId).select().single();
+// Server decides: active account + verified status required. studentId is ignored
+// on purpose — the backend always uses the authenticated user's own record.
+export async function startChallenge(_studentId?: string): Promise<Student> {
+  const { data, error } = await db.rpc("start_challenge");
   if (error) throw error;
   return data as Student;
 }

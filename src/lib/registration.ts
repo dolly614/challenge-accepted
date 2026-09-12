@@ -68,13 +68,16 @@ export async function registerStudent(input: RegisterInput) {
     options: {
       emailRedirectTo: `${window.location.origin}/dashboard`,
       data: {
-        role: "student",
+        // Role is assigned server-side; anything sent here is ignored by the database.
         full_name: input.studentName,
         class: input.studentClass,
         class_level: input.studentClass,
         school_name: input.schoolName,
         mobile_number: input.mobileNumber,
         display_email: displayEmail,
+        referral_code: input.referralCode?.trim() || null,
+        terms_accepted: input.termsAccepted ? "true" : "false",
+        terms_version: "v1",
       },
     },
   });

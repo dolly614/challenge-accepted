@@ -30,6 +30,10 @@ export interface RegisterInput {
   mobileNumber: string;
   password: string;
   email?: string;
+  /** Untrusted referral code from ?ref= — server validates it against approved teachers. */
+  referralCode?: string;
+  /** Terms checkbox; server records the acceptance and rejects unaccepted signups. */
+  termsAccepted?: boolean;
 }
 
 export type DocumentType = "school_id_card" | "birth_certificate" | "aadhaar_card";

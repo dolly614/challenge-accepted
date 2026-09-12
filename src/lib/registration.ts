@@ -30,6 +30,10 @@ export interface RegisterInput {
   mobileNumber: string;
   password: string;
   email?: string;
+  /** Untrusted referral code from ?ref= — server validates it against approved teachers. */
+  referralCode?: string;
+  /** Terms checkbox; server records the acceptance and rejects unaccepted signups. */
+  termsAccepted?: boolean;
 }
 
 export type DocumentType = "school_id_card" | "birth_certificate" | "aadhaar_card";
@@ -64,13 +68,16 @@ export async function registerStudent(input: RegisterInput) {
     options: {
       emailRedirectTo: `${window.location.origin}/dashboard`,
       data: {
-        role: "student",
+        // Role is assigned server-side; anything sent here is ignored by the database.
         full_name: input.studentName,
         class: input.studentClass,
         class_level: input.studentClass,
         school_name: input.schoolName,
         mobile_number: input.mobileNumber,
         display_email: displayEmail,
+        referral_code: input.referralCode?.trim() || null,
+        terms_accepted: input.termsAccepted ? "true" : "false",
+        terms_version: "v1",
       },
     },
   });
@@ -176,9 +183,10 @@ export async function listPendingVerifications(): Promise<Student[]> {
 
 /* ---------------- START CHALLENGE ---------------- */
 
-export async function startChallenge(studentId: string): Promise<Student> {
-  const { data, error } = await db
-    .from("students").update({ challenge_started: true }).eq("id", studentId).select().single();
+// Server decides: active account + verified status required. studentId is ignored
+// on purpose — the backend always uses the authenticated user's own record.
+export async function startChallenge(_studentId?: string): Promise<Student> {
+  const { data, error } = await db.rpc("start_challenge");
   if (error) throw error;
   return data as Student;
 }

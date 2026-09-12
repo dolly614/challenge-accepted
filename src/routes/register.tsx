@@ -87,6 +87,8 @@ function Register() {
         mobileNumber: `+91${form.mobile.replace(/\D/g, "")}`,
         password: form.password,
         email: form.email || undefined,
+        referralCode: ref,
+        termsAccepted: agree,
       });
       if (ref) {
         await attributeReferral({

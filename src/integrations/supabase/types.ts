@@ -476,17 +476,24 @@ export type Database = {
       students: {
         Row: {
           challenge_started: boolean
+          challenge_started_at: string | null
           class: string
           created_at: string
           document_type: string | null
           document_url: string | null
           email: string | null
           id: string
+          mobile_normalized: string | null
           mobile_number: string
           photo_url: string | null
+          referral_code: string | null
+          referred_by_teacher_id: string | null
           rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           school_name: string
           student_name: string
+          submitted_at: string | null
           updated_at: string
           user_id: string
           verification_status: Database["public"]["Enums"]["verification_status"]
@@ -495,17 +502,24 @@ export type Database = {
         }
         Insert: {
           challenge_started?: boolean
+          challenge_started_at?: string | null
           class?: string
           created_at?: string
           document_type?: string | null
           document_url?: string | null
           email?: string | null
           id?: string
+          mobile_normalized?: string | null
           mobile_number?: string
           photo_url?: string | null
+          referral_code?: string | null
+          referred_by_teacher_id?: string | null
           rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           school_name?: string
           student_name?: string
+          submitted_at?: string | null
           updated_at?: string
           user_id: string
           verification_status?: Database["public"]["Enums"]["verification_status"]
@@ -514,24 +528,39 @@ export type Database = {
         }
         Update: {
           challenge_started?: boolean
+          challenge_started_at?: string | null
           class?: string
           created_at?: string
           document_type?: string | null
           document_url?: string | null
           email?: string | null
           id?: string
+          mobile_normalized?: string | null
           mobile_number?: string
           photo_url?: string | null
+          referral_code?: string | null
+          referred_by_teacher_id?: string | null
           rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           school_name?: string
           student_name?: string
+          submitted_at?: string | null
           updated_at?: string
           user_id?: string
           verification_status?: Database["public"]["Enums"]["verification_status"]
           verified_at?: string | null
           verified_by?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "students_referred_by_teacher_id_fkey"
+            columns: ["referred_by_teacher_id"]
+            isOneToOne: false
+            referencedRelation: "teachers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       teacher_commissions: {
         Row: {
@@ -771,6 +800,33 @@ export type Database = {
         }
         Relationships: []
       }
+      terms_acceptances: {
+        Row: {
+          accepted: boolean
+          accepted_at: string
+          created_at: string
+          id: string
+          terms_version: string
+          user_id: string
+        }
+        Insert: {
+          accepted?: boolean
+          accepted_at?: string
+          created_at?: string
+          id?: string
+          terms_version?: string
+          user_id: string
+        }
+        Update: {
+          accepted?: boolean
+          accepted_at?: string
+          created_at?: string
+          id?: string
+          terms_version?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       testimonials: {
         Row: {
           class_info: string
@@ -921,22 +977,30 @@ export type Database = {
         Returns: boolean
       }
       is_account_active: { Args: { _user_id: string }; Returns: boolean }
+      normalize_mobile: { Args: { _raw: string }; Returns: string }
       registration_status: { Args: never; Returns: Json }
       review_student_verification: {
         Args: { p_approve: boolean; p_reason: string; p_student_id: string }
         Returns: {
           challenge_started: boolean
+          challenge_started_at: string | null
           class: string
           created_at: string
           document_type: string | null
           document_url: string | null
           email: string | null
           id: string
+          mobile_normalized: string | null
           mobile_number: string
           photo_url: string | null
+          referral_code: string | null
+          referred_by_teacher_id: string | null
           rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           school_name: string
           student_name: string
+          submitted_at: string | null
           updated_at: string
           user_id: string
           verification_status: Database["public"]["Enums"]["verification_status"]
@@ -951,6 +1015,41 @@ export type Database = {
         }
       }
       server_now: { Args: never; Returns: string }
+      start_challenge: {
+        Args: never
+        Returns: {
+          challenge_started: boolean
+          challenge_started_at: string | null
+          class: string
+          created_at: string
+          document_type: string | null
+          document_url: string | null
+          email: string | null
+          id: string
+          mobile_normalized: string | null
+          mobile_number: string
+          photo_url: string | null
+          referral_code: string | null
+          referred_by_teacher_id: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          school_name: string
+          student_name: string
+          submitted_at: string | null
+          updated_at: string
+          user_id: string
+          verification_status: Database["public"]["Enums"]["verification_status"]
+          verified_at: string | null
+          verified_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "students"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       submit_for_verification: {
         Args: {
           p_document_type: string
@@ -959,17 +1058,24 @@ export type Database = {
         }
         Returns: {
           challenge_started: boolean
+          challenge_started_at: string | null
           class: string
           created_at: string
           document_type: string | null
           document_url: string | null
           email: string | null
           id: string
+          mobile_normalized: string | null
           mobile_number: string
           photo_url: string | null
+          referral_code: string | null
+          referred_by_teacher_id: string | null
           rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           school_name: string
           student_name: string
+          submitted_at: string | null
           updated_at: string
           user_id: string
           verification_status: Database["public"]["Enums"]["verification_status"]

@@ -98,7 +98,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <Ctx.Provider value={{ user, session, role, loading, roleLoading, signOut: async () => { await supabase.auth.signOut(); } }}>
+    <Ctx.Provider
+      value={{
+        user, session, role, loading, roleLoading,
+        signOut: async () => {
+          await qc.cancelQueries();
+          qc.clear();
+          await supabase.auth.signOut();
+          setRole(null);
+          if (typeof window !== "undefined") window.location.assign("/");
+        },
+      }}
+    >
       {children}
     </Ctx.Provider>
   );

@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useRouter } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 
-type Role = "admin" | "student" | null;
+type Role = "admin" | "teacher" | "student" | null;
 
 type AuthCtx = {
   user: User | null;
@@ -32,8 +32,9 @@ async function fetchUserRole(userId: string): Promise<Role> {
     return null;
   }
 
-  const roles = (data ?? []).map((row) => row.role);
+  const roles = (data ?? []).map((row) => row.role) as string[];
   if (roles.includes("admin")) return "admin";
+  if (roles.includes("teacher")) return "teacher";
   if (roles.includes("student")) return "student";
   return null;
 }

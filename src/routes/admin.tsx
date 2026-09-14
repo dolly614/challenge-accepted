@@ -12,11 +12,16 @@ import { StudentVerifications } from "@/components/admin/StudentVerifications";
 
 import { useAuth } from "@/hooks/use-auth";
 import { Link } from "@tanstack/react-router";
+import { RequireAuth } from "@/components/auth/RequireAuth";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin — Uyanix 30 Days Challenge" }] }),
-  component: Admin,
+  component: AdminGuarded,
 });
+
+function AdminGuarded() {
+  return <RequireAuth><Admin /></RequireAuth>;
+}
 
 function Admin() {
   const { user, role, loading, roleLoading } = useAuth();

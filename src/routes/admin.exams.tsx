@@ -7,11 +7,16 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Plus, Lock, Calendar, Pencil, Trash2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { RequireAuth } from "@/components/auth/RequireAuth";
 
 export const Route = createFileRoute("/admin/exams")({
   head: () => ({ meta: [{ title: "Manage Exams — Admin" }] }),
-  component: AdminExams,
+  component: AdminExamsGuarded,
 });
+
+function AdminExamsGuarded() {
+  return <RequireAuth role="admin"><AdminExams /></RequireAuth>;
+}
 
 type ExamRow = {
   id: string;

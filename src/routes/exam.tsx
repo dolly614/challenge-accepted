@@ -5,12 +5,17 @@ import { Footer } from "@/components/site/Footer";
 import { useEffect, useState } from "react";
 import { Clock, Trophy, Award, CreditCard, Lock, ShieldCheck, CalendarClock } from "lucide-react";
 import { generateCertificate } from "@/lib/certificate";
+import { RequireAuth } from "@/components/auth/RequireAuth";
 
 export const Route = createFileRoute("/exam")({
   validateSearch: (s: Record<string, unknown>) => ({ type: s.type === "final" ? "final" as const : "mid" as const }),
   head: () => ({ meta: [{ title: "Exam — Uyanix 30 Days Challenge" }] }),
-  component: Exam,
+  component: ExamGuarded,
 });
+
+function ExamGuarded() {
+  return <RequireAuth><Exam /></RequireAuth>;
+}
 
 const MAX_ATTEMPTS = 3;
 const FEE = 199;

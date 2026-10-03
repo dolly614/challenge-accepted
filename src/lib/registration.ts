@@ -9,6 +9,7 @@ export interface Student {
   student_name: string;
   class: string;
   school_name: string;
+  registration_id: string | null;
   mobile_number: string;
   email: string | null;
   document_type: string | null;
@@ -27,6 +28,8 @@ export interface RegisterInput {
   studentName: string;
   studentClass: string;
   schoolName: string;
+  /** Mandatory student Registration ID (e.g. OEC26097287); server re-validates. */
+  registrationId: string;
   mobileNumber: string;
   password: string;
   email?: string;
@@ -49,6 +52,7 @@ const db = supabase as any;
 // derive one from the mobile number so the UI field can stay optional.
 function resolveAuthEmail(input: RegisterInput): { authEmail: string; displayEmail: string | null } {
   const typed = input.email?.trim();
+  if (!/^[A-Za-z0-9-]{4,30}$/.test(input.registrationId?.trim() ?? "")) throw new Error("Sahi Registration ID daalein.");
   if (typed) {
     if (!EMAIL_REGEX.test(typed)) throw new Error("Sahi email address daalein.");
     return { authEmail: typed, displayEmail: typed };
@@ -73,6 +77,7 @@ export async function registerStudent(input: RegisterInput) {
         class: input.studentClass,
         class_level: input.studentClass,
         school_name: input.schoolName,
+        registration_id: input.registrationId.trim().toUpperCase(),
         mobile_number: input.mobileNumber,
         display_email: displayEmail,
         referral_code: input.referralCode?.trim() || null,

@@ -488,6 +488,7 @@ export type Database = {
           photo_url: string | null
           referral_code: string | null
           referred_by_teacher_id: string | null
+          registration_id: string | null
           rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -514,6 +515,7 @@ export type Database = {
           photo_url?: string | null
           referral_code?: string | null
           referred_by_teacher_id?: string | null
+          registration_id?: string | null
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -540,6 +542,7 @@ export type Database = {
           photo_url?: string | null
           referral_code?: string | null
           referred_by_teacher_id?: string | null
+          registration_id?: string | null
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -995,6 +998,7 @@ export type Database = {
           photo_url: string | null
           referral_code: string | null
           referred_by_teacher_id: string | null
+          registration_id: string | null
           rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -1031,6 +1035,7 @@ export type Database = {
           photo_url: string | null
           referral_code: string | null
           referred_by_teacher_id: string | null
+          registration_id: string | null
           rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -1070,6 +1075,7 @@ export type Database = {
           photo_url: string | null
           referral_code: string | null
           referred_by_teacher_id: string | null
+          registration_id: string | null
           rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null

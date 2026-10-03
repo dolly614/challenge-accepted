@@ -35,7 +35,7 @@ const DOCS: { key: DocumentType; label: string }[] = [
 function Register() {
   const nav = useNavigate();
   const { ref } = Route.useSearch();
-  const [form, setForm] = useState({ name: "", cls: "5", school: "", mobile: "", email: "", password: "" });
+  const [form, setForm] = useState({ name: "", cls: "5", school: "", registrationId: "", mobile: "", email: "", password: "" });
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agree, setAgree] = useState(false);
   const [stepError, setStepError] = useState<string | null>(null);
@@ -84,6 +84,7 @@ function Register() {
         studentName: form.name,
         studentClass: form.cls,
         schoolName: form.school,
+        registrationId: form.registrationId,
         mobileNumber: `+91${form.mobile.replace(/\D/g, "")}`,
         password: form.password,
         email: form.email || undefined,
@@ -158,6 +159,7 @@ function Register() {
               </Field>
               <Field label="School Name"><input required value={form.school} onChange={upd("school")} placeholder="Enter school name" className={fieldCls}/></Field>
             </div>
+            <Field label="Registration ID"><input required value={form.registrationId} onChange={upd("registrationId")} placeholder="e.g. OEC26097287" maxLength={30} pattern="[A-Za-z0-9\-]{4,30}" title="Sahi Registration ID daalein (4-30 letters/numbers)" className={fieldCls}/></Field>
             <Field label="Mobile Number">
               <div className="flex gap-2">
                 <span className="inline-flex h-11 items-center rounded-xl border border-input bg-accent/50 px-3 text-sm font-semibold text-muted-foreground">+91</span>

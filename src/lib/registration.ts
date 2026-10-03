@@ -27,6 +27,8 @@ export interface RegisterInput {
   studentName: string;
   studentClass: string;
   schoolName: string;
+  /** Mandatory student Registration ID (e.g. OEC26097287); server re-validates. */
+  registrationId: string;
   mobileNumber: string;
   password: string;
   email?: string;

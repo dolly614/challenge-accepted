@@ -39,7 +39,7 @@ export interface RegisterInput {
   termsAccepted?: boolean;
 }
 
-export type DocumentType = "school_id_card" | "birth_certificate" | "aadhaar_card";
+export type DocumentType = "school_id_card" | "school_dress_photo";
 export type DocBucket = "verification-documents" | "student-photos";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

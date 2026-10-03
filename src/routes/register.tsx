@@ -28,9 +28,12 @@ export const Route = createFileRoute("/register")({
 
 const DOCS: { key: DocumentType; label: string }[] = [
   { key: "school_id_card", label: "School ID Card" },
-  { key: "birth_certificate", label: "Birth Certificate" },
-  { key: "aadhaar_card", label: "Aadhaar Card" },
+  { key: "school_dress_photo", label: "School Dress Photo" },
 ];
+
+function fileToDataUrl(f: File): Promise<string> {
+  return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result)); r.onerror = rej; r.readAsDataURL(f); });
+}
 
 function Register() {
   const nav = useNavigate();
@@ -48,6 +51,7 @@ function Register() {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [student, setStudent] = useState<Student | null>(null);
+  const checkDoc = useServerFn(checkVerificationDocument);
 
   useEffect(() => {
     if (!ref) return;
@@ -109,8 +113,12 @@ function Register() {
     e.preventDefault();
     setSubmitError(null);
     if (!docFile) { setSubmitError("Verification document upload karein."); return; }
+    if (docType === "school_dress_photo" && !/^image\/(png|jpeg)$/.test(docFile.type)) { setSubmitError("School dress photo JPG ya PNG honi chahiye."); return; }
+    if (docFile.size > 5 * 1024 * 1024) { setSubmitError("File 5MB se chhoti honi chahiye."); return; }
     setLoading(true);
     try {
+      const check = await checkDoc({ data: { kind: docType as "school_id_card" | "school_dress_photo", image: await fileToDataUrl(docFile) } });
+      if (!check.ok) { setSubmitError(check.message); return; }
       const docPath = await uploadVerificationDocument(docFile);
       const photoPath = photoFile ? await uploadStudentPhoto(photoFile) : null;
       const rec = await submitForVerification(docType, docPath, photoPath);
